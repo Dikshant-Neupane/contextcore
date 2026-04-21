@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from tree_sitter import Language, Parser
+from tree_sitter import Language, Parser as _TSParser
 import tree_sitter_python
 
 
@@ -71,7 +71,7 @@ def parse_file(filepath: str) -> ParseResult:
         return _error_result(source_path, "READ_FAILED", str(exc))
 
     language = Language(tree_sitter_python.language())
-    parser = Parser(language)
+    parser = _TSParser(language)
     tree = parser.parse(content.encode("utf-8"))
     root_node = tree.root_node
 
@@ -86,3 +86,10 @@ def parse_file(filepath: str) -> ParseResult:
         has_syntax_error=root_node.has_error,
         error=None,
     )
+
+
+class Parser:
+    """Thin object wrapper around parse_file() for fixture-based tests."""
+
+    def parse(self, filepath) -> ParseResult:
+        return parse_file(str(filepath))

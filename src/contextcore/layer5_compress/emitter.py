@@ -58,3 +58,10 @@ def emit_markdown(structure: FileStructure) -> str:
         lines.append(f"fn: {fn_str}")
 
     return "\n".join(lines)
+
+
+class Emitter:
+    """Thin object wrapper around emit_markdown() for fixture-based tests."""
+
+    def emit(self, structure: FileStructure) -> str:
+        return emit_markdown(structure)

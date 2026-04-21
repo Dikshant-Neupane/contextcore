@@ -49,6 +49,7 @@ class GraphBuilder:
         """Get a database connection."""
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")  # Enable foreign key constraints
         return conn
 
     def index_file(self, filepath: Path | str) -> None:

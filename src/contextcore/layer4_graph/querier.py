@@ -67,6 +67,7 @@ class GraphQuerier:
         """Get read-only connection to graph DB."""
         conn = sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True)
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")  # Enable foreign key constraints
         return conn
 
     def query(self, text: str, token_budget: int = 600, max_latency_ms: int = 500) -> SubgraphResult:

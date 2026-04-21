@@ -8,7 +8,7 @@ that Layer 5 will emit as structured Markdown.
 from dataclasses import dataclass
 from pathlib import Path
 
-from tree_sitter import Language, Parser
+from tree_sitter import Language, Parser as _TSParser
 import tree_sitter_python
 
 from contextcore.layer1_ast.parser import ParseError
@@ -116,7 +116,7 @@ def extract_structure(filepath: str) -> FileStructure:
 
     source_bytes = content.encode("utf-8")
     language = Language(tree_sitter_python.language())
-    parser = Parser(language)
+    parser = _TSParser(language)
     root = parser.parse(source_bytes).root_node
 
     functions: list[FunctionSignature] = []
@@ -144,3 +144,13 @@ def extract_structure(filepath: str) -> FileStructure:
         classes=tuple(classes),
         error=None,
     )
+
+
+class Extractor:
+    """Thin object wrapper around extract_structure() for fixture-based tests."""
+
+    def extract(self, filepath_or_result) -> FileStructure:
+        from contextcore.layer1_ast.parser import ParseResult
+        if isinstance(filepath_or_result, ParseResult):
+            return extract_structure(filepath_or_result.source_path)
+        return extract_structure(str(filepath_or_result))
