@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+src/contextcore/__init__.py
+src/contextcore.egg-info/PKG-INFO
+src/contextcore.egg-info/SOURCES.txt
+src/contextcore.egg-info/dependency_links.txt
+src/contextcore.egg-info/requires.txt
+src/contextcore.egg-info/top_level.txt
+src/contextcore/layer1_ast/__init__.py
+src/contextcore/layer1_ast/extractor.py
+src/contextcore/layer1_ast/parser.py
+src/contextcore/layer5_compress/__init__.py
+src/contextcore/layer5_compress/emitter.py
+tests/test_quality.py

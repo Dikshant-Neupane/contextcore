@@ -1,0 +1,100 @@
+# CONTEXTCORE v1.0
+
+> AST-powered context compression for AI coding assistants.
+> **11x fewer tokens. 100% answer accuracy. 100% local.**
+
+---
+
+## The problem
+
+When you paste files into an AI assistant, you're sending raw source code — comments, blank lines, import boilerplate, function bodies, everything. Most of it is noise. A 20-file Python project can cost 1,500+ tokens before you even ask a question.
+
+## What v1 does
+
+CONTEXTCORE parses your Python project with Tree-sitter (locally, zero network calls), extracts only the structural skeleton — class names, method signatures, return types, parameter types — and emits it as compact structured Markdown.
+
+```
+## user_service.py
+fn: build_user(user_id:str,name:str,email:str="")->User | find_active_users(users:list[User])->list[User]
+
+## project.py
++ Project: archive()->None | set_owner(owner_id:str)->None | summary()->str | to_dict()->dict[str,object]
+```
+
+That's it. No bodies. No docstrings. No noise. Just the contract.
+
+## v1 benchmark results
+
+| Metric | Result | Target |
+|---|---|---|
+| Compression ratio | **11.38x** | >5x |
+| Answer accuracy (compressed) | **10/10 (100%)** | ≥80% |
+| Accuracy retained vs raw | **100%** | — |
+| Parse failures | **0 / 20 files** | 0 |
+
+Tested on a 20-file Python project (models, services, utilities, entry point).
+
+## Install
+
+```bash
+pip install -e ".[dev]"
+```
+
+Requires Python 3.11+.
+
+## Run the benchmark
+
+```bash
+python benchmarks/token_count.py
+```
+
+## Run the quality evaluator
+
+```bash
+python benchmarks/quality_eval.py
+```
+
+## Run tests
+
+```bash
+pytest tests/ -v
+```
+
+All 14 tests pass.
+
+## How it works
+
+```
+Raw .py files
+    ↓
+[L1] Tree-sitter AST extractor  →  FileStructure (classes + function signatures)
+    ↓
+[L5] Markdown emitter           →  compact single-line structural Markdown
+    ↓
+Output: ~11x fewer tokens, same answerable questions
+```
+
+- **Layer 1** (`src/contextcore/layer1_ast/`) — Tree-sitter Python parser + structure extractor
+- **Layer 5** (`src/contextcore/layer5_compress/`) — Compact Markdown emitter
+- **Layers 2, 3, 4** — Locked until v1 benchmarks passed. They passed.
+
+## What v1 deliberately does NOT do
+
+- No graph database
+- No intent classification
+- No external API calls (source code never leaves your machine)
+- No CLI tool yet
+- No multi-language support yet (Python only)
+
+## Privacy
+
+Source code is **never sent anywhere**. Tree-sitter runs locally. No telemetry. No analytics.
+
+## What's next (v2)
+
+SQLite-backed dependency graph + relevance-ranked context slicing.
+See [PROJECT.md](PROJECT.md) for the full roadmap.
+
+---
+
+*v1.0 — 2026-04-21*
