@@ -1,100 +1,62 @@
-# CONTEXTCORE v1.0
+# CONTEXTCORE
 
-> AST-powered context compression for AI coding assistants.
-> **11x fewer tokens. 100% answer accuracy. 100% local.**
+AST-first context infrastructure for AI coding workflows.
 
----
+- v1 sealed: 11.38x compression, 100% quality accuracy
+- v2 in progress: Layer 4 graph complete, CLI and hooks next
+- local-first: source code never leaves your machine
 
-## The problem
+## Current status
 
-When you paste files into an AI assistant, you're sending raw source code — comments, blank lines, import boilerplate, function bodies, everything. Most of it is noise. A 20-file Python project can cost 1,500+ tokens before you even ask a question.
+| Track | Status |
+|---|---|
+| v1 | SEALED (tag: v1.0) |
+| v2 Layer 4 | COMPLETE (23/23 tests passing) |
+| v2 CLI + Hooks | NEXT |
+| Full active suite | 82 passed, 30 skipped, 0 failed |
 
-## What v1 does
+## Why CONTEXTCORE exists
 
-CONTEXTCORE parses your Python project with Tree-sitter (locally, zero network calls), extracts only the structural skeleton — class names, method signatures, return types, parameter types — and emits it as compact structured Markdown.
+Raw file dumps waste context window and cost tokens. CONTEXTCORE reduces code to structural, task-relevant context before it reaches an assistant.
 
-```
-## user_service.py
-fn: build_user(user_id:str,name:str,email:str="")->User | find_active_users(users:list[User])->list[User]
+## Architecture (roadmap)
 
-## project.py
-+ Project: archive()->None | set_owner(owner_id:str)->None | summary()->str | to_dict()->dict[str,object]
-```
+1. L1: static AST extraction (Tree-sitter)
+2. L2: temporal graph (planned)
+3. L3: intent routing (planned)
+4. L4: dependency graph and retrieval (active)
+5. L5: compact markdown emission
 
-That's it. No bodies. No docstrings. No noise. Just the contract.
-
-## v1 benchmark results
+## v1 results (sealed)
 
 | Metric | Result | Target |
 |---|---|---|
-| Compression ratio | **11.38x** | >5x |
-| Answer accuracy (compressed) | **10/10 (100%)** | ≥80% |
-| Accuracy retained vs raw | **100%** | — |
-| Parse failures | **0 / 20 files** | 0 |
+| Compression ratio | 11.38x | >5x |
+| Accuracy on eval set | 10/10 (100%) | >=80% |
+| Parse failures | 0/20 files | 0 |
 
-Tested on a 20-file Python project (models, services, utilities, entry point).
-
-## Install
+## Quick start
 
 ```bash
 pip install -e ".[dev]"
+python tests/run_all.py
 ```
 
-Requires Python 3.11+.
+## Documentation index
 
-## Run the benchmark
+- [CLAUDE.md](CLAUDE.md): project operating rules
+- [PROJECT.md](PROJECT.md): roadmap and session dashboards
+- [CONTEXT.md](CONTEXT.md): session log and tracker
+- [DECISIONS.md](DECISIONS.md): ADR history
+- [.contextcore/context_snapshot.md](.contextcore/context_snapshot.md): current execution snapshot
+- [tests/TEST_MANIFEST.md](tests/TEST_MANIFEST.md): phase test map and unlock order
 
-```bash
-python benchmarks/token_count.py
-```
+## Safety and privacy
 
-## Run the quality evaluator
+- local processing only
+- no source-code telemetry
+- no external API calls with source content
 
-```bash
-python benchmarks/quality_eval.py
-```
+## License
 
-## Run tests
-
-```bash
-pytest tests/ -v
-```
-
-All 14 tests pass.
-
-## How it works
-
-```
-Raw .py files
-    ↓
-[L1] Tree-sitter AST extractor  →  FileStructure (classes + function signatures)
-    ↓
-[L5] Markdown emitter           →  compact single-line structural Markdown
-    ↓
-Output: ~11x fewer tokens, same answerable questions
-```
-
-- **Layer 1** (`src/contextcore/layer1_ast/`) — Tree-sitter Python parser + structure extractor
-- **Layer 5** (`src/contextcore/layer5_compress/`) — Compact Markdown emitter
-- **Layers 2, 3, 4** — Locked until v1 benchmarks passed. They passed.
-
-## What v1 deliberately does NOT do
-
-- No graph database
-- No intent classification
-- No external API calls (source code never leaves your machine)
-- No CLI tool yet
-- No multi-language support yet (Python only)
-
-## Privacy
-
-Source code is **never sent anywhere**. Tree-sitter runs locally. No telemetry. No analytics.
-
-## What's next (v2)
-
-SQLite-backed dependency graph + relevance-ranked context slicing.
-See [PROJECT.md](PROJECT.md) for the full roadmap.
-
----
-
-*v1.0 — 2026-04-21*
+MIT (see [LICENSE](LICENSE))
