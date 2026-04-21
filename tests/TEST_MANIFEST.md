@@ -5,20 +5,21 @@
 
 ---
 
-## Summary
+## TEST COUNT BY PHASE (updated session 8)
 
-| Phase | Active tests | Passing | Failing | Skipped | Active |
-|-------|-------------|---------|---------|---------|--------|
-| v1    | 47          | 47      | 0       | 0       | 0      |
-| v2    | 36          | 23      | 0       | 13      | 23     |
-| v3    | TBD         | —       | —       | —       | 0      |
-| v4    | TBD         | —       | —       | —       | 0      |
-| scaffold | 7         | 12      | 0       | 17      | —      |
-| **Total** | **90** | **82** | **0** | **30** | — |
+| Phase     | Registered | Passing | Failing | Skipped | Notes              |
+|-----------|-----------|---------|---------|---------|-------------------|
+| v1        | 47        | 47      | 0       | 0       | SEALED             |
+| v2 — L4   | 23        | 23      | 0       | 0       | COMPLETE session 8 |
+| v2 — CLI  | 6         | 0       | 0       | 6       | Locked — session 9 |
+| v2 — Hook | 4         | 0       | 0       | 4       | Locked — session 9 |
+| v2 — Gate | 3         | 0       | 0       | 3       | Pending GROUND_TRUTH|
+| scaffold  | 7         | 12      | 0       | 17      | —                  |
+| **Total** | **90**    | **82**  | **0**   | **30**  |                    |
 
-Last full run: 82 passed | 30 skipped | 0 failed
-Command:       python tests/run_all.py
-Date:          2026-04-21 (Session 8 close)
+Last full run:  82 passed | 30 skipped | 0 failed
+Command:        python tests/run_all.py
+Date:           2026-04-21 (Session 8 close)
 
 ---
 
@@ -157,6 +158,36 @@ Date:          2026-04-21 (Session 8 close)
 
 ---
 
+## LAYER 4 TEST STATUS (T-048 to T-070) — ALL PASSING
+
+| ID    | Test Name                             | Status | Session |
+|-------|---------------------------------------|--------|---------|
+| T-048 | test_node_types_valid                 | PASS   | 8       |
+| T-049 | test_edge_types_valid                 | PASS   | 8       |
+| T-050 | test_node_id_deterministic            | PASS   | 8       |
+| T-051 | test_edge_id_deterministic            | PASS   | 8       |
+| T-052 | test_builder_creates_file_nodes       | PASS   | 8       |
+| T-053 | test_builder_creates_function_nodes   | PASS   | 8       |
+| T-054 | test_builder_creates_class_nodes      | PASS   | 8       |
+| T-055 | test_builder_creates_imports_edges    | PASS   | 8       |
+| T-056 | test_builder_creates_calls_edges      | PASS   | 8       |
+| T-057 | test_builder_creates_contains_edges   | PASS   | 8       |
+| T-058 | test_builder_handles_circular_imports | PASS   | 8       |
+| T-059 | test_builder_incremental_update       | PASS   | 8       |
+| T-060 | test_builder_persists_to_sqlite       | PASS   | 8       |
+| T-061 | test_querier_returns_subgraph_result  | PASS   | 8       |
+| T-062 | test_bfs_depth_3_max                  | PASS   | 8       |
+| T-063 | test_direct_match_highest_score       | PASS   | 8       |
+| T-064 | test_result_within_token_budget       | PASS   | 8       |
+| T-065 | test_result_within_latency_budget     | PASS   | 8       |
+| T-066 | test_score_direct_match_gt_indirect   | PASS   | 8       |
+| T-067 | test_score_inherits_gt_contains       | PASS   | 8       |
+| T-068 | test_recent_node_bonus_applied        | PASS   | 8       |
+| T-069 | test_build_then_query_roundtrip       | PASS   | 8       |
+| T-070 | test_incremental_reindex_speed        | PASS   | 8       |
+
+---
+
 ## Gate v2 — Kill Tests (v2 🟡 PENDING)
 
 > Fill in `GROUND_TRUTH` in `gate_checks/gate_v2.py` before running.
@@ -278,15 +309,18 @@ To seal v2 and unlock v3:
 
 ---
 
-## SKIP REMOVAL SCHEDULE (Session 8)
-Remove skipif markers ONE FILE AT A TIME in this order:
-1. tests/layer4_graph/test_schema.py    -> after schema.py exists
-2. tests/layer4_graph/test_builder.py   -> after builder.py exists
-3. tests/layer4_graph/test_querier.py   -> after querier.py exists
-4. tests/layer4_graph/test_bfs_scoring.py -> after querier.py exists
-5. tests/layer4_graph/test_layer4_integration.py -> after all L4 passes
-6. tests/cli/test_cli.py               -> after CLI is built (later)
-7. tests/hooks/test_git_hook.py        -> after hooks are built (later)
+## SKIP REMOVAL SCHEDULE (updated)
 
-Rule: Never remove all skipif markers at once.
-      Remove one file. Run full suite. 0 failures. Then next file.
+| File                                    | Tests        | Status         | Session |
+|-----------------------------------------|-------------|----------------|---------|
+| tests/layer4_graph/test_schema.py       | T-048/051   | [DONE] PASS    | 8       |
+| tests/layer4_graph/test_builder.py      | T-052/060   | [DONE] PASS    | 8       |
+| tests/layer4_graph/test_querier.py      | T-061/065   | [DONE] PASS    | 8       |
+| tests/layer4_graph/test_bfs_scoring.py  | T-066/068   | [DONE] PASS    | 8       |
+| tests/layer4_graph/test_layer4_int.py   | T-069/070   | [DONE] PASS    | 8       |
+| tests/cli/test_cli.py                   | T-071/076   | [NEXT] sess 9  | 9       |
+| tests/hooks/test_git_hook.py            | T-077/080   | [NEXT] sess 9  | 9       |
+| tests/gate_checks/gate_v2.py            | T-081/083   | [PENDING] GROUND_TRUTH | —  |
+| tests/integration/test_v2_pipeline.py   | —           | [LOCKED] last  | 9       |
+
+Rule: Remove skipif ONE FILE at a time. Run full suite. 0 failures. Then next.

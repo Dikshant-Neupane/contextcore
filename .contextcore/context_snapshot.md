@@ -1,138 +1,133 @@
 ﻿# CONTEXTCORE — context_snapshot.md
 # AI-MAINTAINED — Full replace after every session. Max 80 lines.
-# Last Updated: 2026-04-21 | Session: 7 CLOSED → 8 READY
-# Updated By: Human (session 7 close-out)
+# Last Updated: 2026-04-21 | Session: 8 CLOSED -> 9 READY
+# Updated By: Human (session 8 close-out)
 
 ---
 
 ## WHERE WE ARE
 - Version:          v2.0 — IN PROGRESS
-- Active Layers:    L4 (Graph) + L4 (Slice) + CLI + Git Hook
-- Test Phase:       v2 scaffold COMPLETE | implementation starting
-- v1 Baseline:      11.38x compression | 100% accuracy | 33/33 sealed
+- Active Layers:    L4 COMPLETE | CLI + Git Hook next
+- Test Phase:       82 passed | 30 skipped | 0 failed
+- v1 Baseline:      11.38x compression | 100% accuracy | SEALED
+- v2 L4 Result:     23/23 L4 tests passing | cascade deletes verified
 
 ---
 
-## TEST SYSTEM STATE (as of end of session 7)
-- Total tests in manifest:   T-001 to T-090 (90 registered)
-- Passing:                   59
-- Skipped (locked stubs):    53  <- these unlock as L4 is built
-- Failed:                    0   <- must stay 0 at all times
-- Gate v1:                   SEALED (gate_v1.py — 4 assertions)
-- Gate v2:                   PENDING (GROUND_TRUTH stubs present, not filled)
-- Gate v3/v4:                LOCKED
-- Last full run command:      python tests/run_all.py
-- Last run result:            59 passed | 53 skipped | 0 failed
+## WHAT WAS COMPLETED IN SESSION 8
+
+### Commits (in order)
+        02980a4  chore: added MIT license
+        f354a57  feat(Layer4): schema + builder + querier complete
+                                         T-048 to T-070 unlocked and passing
+        16699a2  refactor(Layer4): SQLite foreign key enforcement
+                                         cascade deletes rechecked and confirmed correct
+
+### Artifacts now in repo
+        src/contextcore/layer4_graph/schema.py      COMPLETE
+        src/contextcore/layer4_graph/builder.py     COMPLETE
+        src/contextcore/layer4_graph/querier.py     COMPLETE
+        db/schema.sql                               COMPLETE
+        tests/layer4_graph/test_schema.py           23/23 PASSING
+        tests/layer4_graph/test_builder.py          PASSING
+        tests/layer4_graph/test_querier.py          PASSING
+        tests/layer4_graph/test_bfs_scoring.py      PASSING
+        tests/layer4_graph/test_layer4_integration  PASSING
+
+### Technical decision made (session 8)
+        SQLite foreign key enforcement enabled (PRAGMA foreign_keys = ON)
+        Cascade deletes verified: deleting a FILE node removes all
+        child FUNCTION + CLASS nodes and all edges sourced from them.
+        This is correct behaviour for incremental re-index on file delete.
 
 ---
 
-## WHAT WAS COMPLETED IN SESSION 7
-- tests/gate_checks/gate_v1.py      SEALED — 4 assertions on v1 results
-- tests/gate_checks/gate_v2.py      PENDING — GROUND_TRUTH stubs + skipif guard
-- tests/gate_checks/gate_v3.py      LOCKED
-- tests/gate_checks/gate_v4.py      LOCKED
-- tests/layer4_graph/               7 files | 23 locked stubs (T-048 to T-070)
-- tests/cli/test_cli.py             6 locked stubs (T-071 to T-076)
-- tests/hooks/test_git_hook.py      4 locked stubs (T-077 to T-080)
-- tests/TEST_MANIFEST.md            T-001 to T-090 registered
-- tests/run_all.py                  Windows cp1252 Unicode crash fixed
-- pyproject.toml                    python_files = ["test_*.py", "gate_*.py"]
-- CLAUDE.md                         Test system rules appended
-
----
-
-## WINDOWS CP1252 FIX — WHAT WAS DONE AND WHY
-Problem:  print() calls with emoji (✅ ❌ 🧪 etc.) crash on Windows
-          cp1252 terminals with UnicodeEncodeError.
-Fix:      sys.stdout recoded at startup in run_all.py.
-          Console output emojis replaced with ASCII equivalents
-          in all print() paths.
-          File writes (report Markdown) remain UTF-8 — unaffected.
-Rule:     All future print() in run_all.py and any CLI output file
-          must use ASCII-safe symbols for console.
-          Markdown report files may use UTF-8 freely.
-ASCII map used:
-          PASS    ->  [PASS]   (was ✅)
-          FAIL    ->  [FAIL]   (was ❌)
-          SKIP    ->  [SKIP]   (was ⏭)
-          LOCKED  ->  [LOCK]   (was 🔒)
-          PENDING ->  [...]    (was 🟡)
+## TEST SUITE STATE (exact, end of session 8)
+        Total registered:  90  (T-001 to T-090)
+        Passing:           82
+        Skipped:           30  <- CLI (T-071/076) + hooks (T-077/080) still locked
+        Failing:            0  <- must stay 0 always
+        Next unlock:       T-071 to T-076 (CLI) then T-077 to T-080 (hooks)
 
 ---
 
 ## FILES STATE — COMPLETE PICTURE
-### v1 (SEALED — do not touch)
-- src/contextcore/layer1_ast/parser.py        SEALED
-- src/contextcore/layer1_ast/extractor.py     SEALED
-- src/contextcore/layer5_compress/emitter.py  SEALED
-- benchmarks/token_count.py                   SEALED
-- benchmarks/quality_eval.py                  SEALED
 
-### v2 Test Scaffold (COMPLETE — do not add stubs)
-- tests/layer4_graph/test_schema.py           23 stubs locked
-- tests/layer4_graph/test_builder.py          locked stubs
-- tests/layer4_graph/test_querier.py          locked stubs
-- tests/layer4_graph/test_bfs_scoring.py      locked stubs
-- tests/layer4_graph/test_layer4_integration  locked stubs
-- tests/cli/test_cli.py                       locked stubs
-- tests/hooks/test_git_hook.py                locked stubs
+        SEALED (v1 — do not touch)
+                src/contextcore/layer1_ast/          SEALED
+                src/contextcore/layer5_compress/     SEALED
+                benchmarks/token_count.py            SEALED
+                benchmarks/quality_eval.py           SEALED
+                tests/gate_checks/gate_v1.py         SEALED
 
-### v2 Implementation (BUILD THIS — session 8 starts here)
-- src/contextcore/layer4_graph/__init__.py    NOT CREATED
-- src/contextcore/layer4_graph/schema.py      NOT CREATED
-- src/contextcore/layer4_graph/builder.py     NOT CREATED
-- src/contextcore/layer4_graph/querier.py     NOT CREATED
-- db/schema.sql                               NOT CREATED
-- db/__init__.py                              NOT CREATED
+        COMPLETE (v2 L4 — do not touch)
+                src/contextcore/layer4_graph/        COMPLETE
+                db/schema.sql                        COMPLETE
+                tests/layer4_graph/                  COMPLETE 23/23
+
+        BUILD THIS (session 9)
+                src/contextcore/cli/__init__.py      NOT CREATED
+                src/contextcore/cli/main.py          NOT CREATED
+                hooks/post-commit                    NOT CREATED
+                hooks/install_hooks.py               NOT CREATED
+
+        STILL LOCKED (unlock after CLI + hook built)
+                tests/cli/test_cli.py                6 stubs (T-071 to T-076)
+                tests/hooks/test_git_hook.py         4 stubs (T-077 to T-080)
+                tests/integration/test_v2_pipeline.py LOCKED (unlock last)
 
 ---
 
 ## NEXT SESSION — PICK UP EXACTLY HERE
 
-FIRST COMMAND OF SESSION 8 (before anything else):
-  python tests/run_all.py
-  -> Must show: 59 passed | 53 skipped | 0 failed
-  -> If different: stop and fix before building anything
+FIRST COMMAND (before any code):
+        python tests/run_all.py
+        Expected: 82 passed | 30 skipped | 0 failed
+        If different: STOP. Fix before building anything.
 
-BUILD ORDER (strict — do not skip steps):
+BUILD ORDER (strict):
 
-  STEP 1: src/contextcore/layer4_graph/schema.py
-          -> Python dataclasses: GraphNode, GraphEdge,
-             EdgeType, NodeType, EdgeConfidence, SubgraphResult
-          -> Remove skipif from tests/layer4_graph/test_schema.py
-          -> Run: pytest tests/layer4_graph/test_schema.py -v
-          -> Must: 4 tests GREEN, 0 RED
-          -> Update TEST_MANIFEST.md: T-048 to T-051 -> PASS
+        STEP 1: src/contextcore/cli/main.py
+                                        -> Typer-based CLI (pip install typer already in pyproject.toml?)
+                                        -> 4 commands: index / query / status / diff
+                                        -> index  -> calls GraphBuilder.index_directory()
+                                        -> query  -> calls GraphQuerier.query() -> L5 Markdown output
+                                        -> status -> reads index_meta from SQLite
+                                        -> diff   -> git diff HEAD~1 HEAD --name-only | show affected nodes
+                                        -> Remove skipif from tests/cli/test_cli.py ONE TEST AT A TIME
+                                        -> Target: T-071 to T-076 GREEN
 
-  STEP 2: db/schema.sql
-          -> SQLite DDL: nodes table + edges table + index_meta
-          -> Indexes on filepath, name, node_type, source_id, target_id
-          -> Run: sqlite3 .contextcore/test.db < db/schema.sql
-          -> Confirm tables created
+        STEP 2: hooks/post-commit + hooks/install_hooks.py
+                                        -> post-commit: bash script, calls contextcore index --incremental
+                                        -> install_hooks.py: copies hook, makes executable, idempotent
+                                        -> Remove skipif from tests/hooks/test_git_hook.py ONE AT A TIME
+                                        -> Target: T-077 to T-080 GREEN
 
-  STEP 3: src/contextcore/layer4_graph/builder.py
-          -> Reads L1 extractor output (FileStructure)
-          -> Writes nodes + edges to SQLite
-          -> Remove skipif from test_builder.py ONE TEST AT A TIME
-          -> Red -> Green -> next test
-          -> Target: T-052 to T-060 all GREEN
+        STEP 3: python tests/run_all.py
+                                        -> Must: 90 passed | 0 skipped | 0 failed
+                                        -> All 90 tests green = full v2 implementation complete
 
-  STEP 4: src/contextcore/layer4_graph/querier.py
-          -> BFS from seed nodes, depth 3, ADR-007 scoring
-          -> Remove skipif from test_querier.py ONE TEST AT A TIME
-          -> Target: T-061 to T-065 all GREEN
+        STEP 4: Dogfood
+                                        -> Run: contextcore index ./your-real-project
+                                        -> Use contextcore query for real dev tasks for 1 full day
+                                        -> Note every friction point. Fix top 3.
+                                        -> Fill GROUND_TRUTH in tests/gate_checks/gate_v2.py
 
-  STEP 5: python tests/run_all.py
-          -> Must show: 82+ passed | fewer skipped | 0 failed
-          -> If 0 failed: commit
+        STEP 5: Kill test
+                                        -> python tests/run_all.py --gate
+                                        -> Must: 8/10 subgraph correct | avg <=500ms | avg <=600 tokens
+                                        -> If passes: git tag v2.0 | unlock v3
 
-DO NOT TOUCH: CLI (T-071 to T-076) or hooks (T-077 to T-080)
-              until querier tests are all GREEN.
+DO NOT TOUCH: v1 sealed files | layer4_graph/ implementation
+                                                        gate_v1.py (sealed) | gate_v2.py GROUND_TRUTH until dogfood
 
 ---
 
-## OPEN DEVELOPER ACTION REQUIRED (AI cannot do this)
-  gate_v2.py GROUND_TRUTH has 10 stub entries ([FILL IN]).
-  Developer must fill these from the dogfood project BEFORE
-  running --gate. This is the kill test. It cannot be automated.
-  Suggested timing: fill during Step 4 dogfood session.
+## OPEN DEVELOPER ACTION REQUIRED
+        [PENDING] Fill GROUND_TRUTH in tests/gate_checks/gate_v2.py
+                                                10 real queries from dogfood project
+                                                Timing: Step 4 above — during dogfood day
+        [PENDING] Choose dogfood project (150-250 file Python project)
+                                                Needed before: Step 4
+        [PENDING] Confirm typer is in pyproject.toml dependencies
+                                                Check before starting Step 1
