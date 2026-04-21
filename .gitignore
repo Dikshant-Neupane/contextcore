@@ -1,3 +1,10 @@
+# Sensitive/private project docs
+CLAUDE.md
+MASTER_PROMPT.md
+DECISIONS.md
+PROJECT.md
+CONTEXT.md
+
 # Python bytecode
 __pycache__/
 *.py[cod]
