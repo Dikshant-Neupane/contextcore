@@ -42,8 +42,7 @@ def emit_markdown(structure: FileStructure) -> str:
     """
 
     if not structure.ok:
-        code = structure.error.code if structure.error else "UNKNOWN"
-        return f"## {structure.source_path} [ERROR:{code}]"
+        return ""
 
     if not structure.classes and not structure.functions:
         return ""
