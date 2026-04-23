@@ -5,21 +5,26 @@
 
 ---
 
-## TEST COUNT BY PHASE (updated session 8)
+## TEST COUNT BY PHASE (updated session 9)
 
-| Phase     | Registered | Passing | Failing | Skipped | Notes              |
-|-----------|-----------|---------|---------|---------|-------------------|
-| v1        | 47        | 47      | 0       | 0       | SEALED             |
-| v2 — L4   | 23        | 23      | 0       | 0       | COMPLETE session 8 |
-| v2 — CLI  | 6         | 0       | 0       | 6       | Locked — session 9 |
-| v2 — Hook | 4         | 0       | 0       | 4       | Locked — session 9 |
-| v2 — Gate | 3         | 0       | 0       | 3       | Pending GROUND_TRUTH|
-| scaffold  | 7         | 12      | 0       | 17      | —                  |
-| **Total** | **90**    | **82**  | **0**   | **30**  |                    |
+| Phase       | Registered | Passing | Failing | Skipped | Notes              |
+|-------------|-----------|---------|---------|---------|-------------------|
+| v1          | 47        | 47      | 0       | 0       | SEALED             |
+| v2 — L4     | 23        | 23      | 0       | 0       | SEALED session 8   |
+| v2 — CLI    | 6         | 6       | 0       | 0       | COMPLETE session 9 |
+| v2 — Hook   | 4         | 4       | 0       | 0       | COMPLETE session 9 |
+| v2 — Gate   | 3         | 0       | 0       | 3       | GROUND_TRUTH empty |
+| integration | —         | 13      | 0       | 17      | v2+ locked         |
+| **Total**   | **90**    | **93**  | **0**   | **20**  | parametrized +3    |
 
-Last full run:  82 passed | 30 skipped | 0 failed
+Last full run:  93 passed | 20 skipped | 0 failed
 Command:        python tests/run_all.py
-Date:           2026-04-21 (Session 8 close)
+Date:           2026-04-23 (Session 9 close)
+
+Note on count: 93 > 90 registered because parametrized tests in
+conftest.py expand some fixtures into multiple cases at runtime.
+Registered count tracks test functions. Pytest count tracks cases.
+Both are correct. The number that matters is: 0 failed.
 
 ---
 
@@ -201,27 +206,27 @@ Date:           2026-04-21 (Session 8 close)
 
 ---
 
-## CLI (v2 🔒 LOCKED)
+## CLI TEST STATUS (T-071 to T-076) — ALL PASSING
 
-| ID    | Test name                       | File                 | Phase | Status |
-|-------|---------------------------------|----------------------|-------|--------|
-| T-071 | test_index_command_runs         | cli/test_cli.py      | v2    | 🔒 LOCKED |
-| T-072 | test_query_command_runs         | cli/test_cli.py      | v2    | 🔒 LOCKED |
-| T-073 | test_status_command_runs        | cli/test_cli.py      | v2    | 🔒 LOCKED |
-| T-074 | test_diff_command_runs          | cli/test_cli.py      | v2    | 🔒 LOCKED |
-| T-075 | test_query_output_is_markdown   | cli/test_cli.py      | v2    | 🔒 LOCKED |
-| T-076 | test_json_flag_returns_json     | cli/test_cli.py      | v2    | 🔒 LOCKED |
+| ID    | Test Name                       | Status | Session |
+|-------|---------------------------------|--------|---------|
+| T-071 | test_index_command_runs         | PASS   | 9       |
+| T-072 | test_query_command_runs         | PASS   | 9       |
+| T-073 | test_status_command_runs        | PASS   | 9       |
+| T-074 | test_diff_command_runs          | PASS   | 9       |
+| T-075 | test_query_output_is_markdown   | PASS   | 9       |
+| T-076 | test_json_flag_returns_json     | PASS   | 9       |
 
 ---
 
-## Git Hooks (v2 🔒 LOCKED)
+## HOOK TEST STATUS (T-077 to T-080) — ALL PASSING
 
-| ID    | Test name                           | File                      | Phase | Status |
-|-------|-------------------------------------|---------------------------|-------|--------|
-| T-077 | test_hook_installs_in_under_30s     | hooks/test_git_hook.py    | v2    | 🔒 LOCKED |
-| T-078 | test_hook_is_executable             | hooks/test_git_hook.py    | v2    | 🔒 LOCKED |
-| T-079 | test_hook_triggers_on_commit        | hooks/test_git_hook.py    | v2    | 🔒 LOCKED |
-| T-080 | test_incremental_reindex_under_2s   | hooks/test_git_hook.py    | v2    | 🔒 LOCKED |
+| ID    | Test Name                           | Status | Session |
+|-------|-------------------------------------|--------|---------|
+| T-077 | test_hook_installs_in_under_30s     | PASS   | 9       |
+| T-078 | test_hook_is_executable             | PASS   | 9       |
+| T-079 | test_hook_triggers_on_commit        | PASS   | 9       |
+| T-080 | test_incremental_reindex_under_2s   | PASS   | 9       |
 
 ---
 
@@ -309,18 +314,21 @@ To seal v2 and unlock v3:
 
 ---
 
-## SKIP REMOVAL SCHEDULE (updated)
+## SKIP REMOVAL SCHEDULE (final state)
 
-| File                                    | Tests        | Status         | Session |
-|-----------------------------------------|-------------|----------------|---------|
-| tests/layer4_graph/test_schema.py       | T-048/051   | [DONE] PASS    | 8       |
-| tests/layer4_graph/test_builder.py      | T-052/060   | [DONE] PASS    | 8       |
-| tests/layer4_graph/test_querier.py      | T-061/065   | [DONE] PASS    | 8       |
-| tests/layer4_graph/test_bfs_scoring.py  | T-066/068   | [DONE] PASS    | 8       |
-| tests/layer4_graph/test_layer4_int.py   | T-069/070   | [DONE] PASS    | 8       |
-| tests/cli/test_cli.py                   | T-071/076   | [NEXT] sess 9  | 9       |
-| tests/hooks/test_git_hook.py            | T-077/080   | [NEXT] sess 9  | 9       |
-| tests/gate_checks/gate_v2.py            | T-081/083   | [PENDING] GROUND_TRUTH | —  |
-| tests/integration/test_v2_pipeline.py   | —           | [LOCKED] last  | 9       |
+| File                                    | Tests      | Status              | Session |
+|-----------------------------------------|------------|---------------------|---------|
+| tests/layer4_graph/test_schema.py       | T-048/051  | [DONE] PASS         | 8       |
+| tests/layer4_graph/test_builder.py      | T-052/060  | [DONE] PASS         | 8       |
+| tests/layer4_graph/test_querier.py      | T-061/065  | [DONE] PASS         | 8       |
+| tests/layer4_graph/test_bfs_scoring.py  | T-066/068  | [DONE] PASS         | 8       |
+| tests/layer4_graph/test_layer4_int.py   | T-069/070  | [DONE] PASS         | 8       |
+| tests/cli/test_cli.py                   | T-071/076  | [DONE] PASS         | 9       |
+| tests/hooks/test_git_hook.py            | T-077/080  | [DONE] PASS         | 9       |
+| tests/gate_checks/gate_v2.py            | T-081/083  | [PENDING] dev fills | 10      |
+| tests/integration/test_v2_pipeline.py   | —          | [LOCKED] post-gate  | 10      |
+| tests/integration/test_v3_pipeline.py   | —          | [LOCKED] v3         | —       |
+| tests/integration/test_v4_pipeline.py   | —          | [LOCKED] v4         | —       |
 
-Rule: Remove skipif ONE FILE at a time. Run full suite. 0 failures. Then next.
+All skipif markers removed except gate_v2.py (by design — waits for
+GROUND_TRUTH) and integration pipeline tests (unlock post-gate).

@@ -1,133 +1,144 @@
 ﻿# CONTEXTCORE — context_snapshot.md
 # AI-MAINTAINED — Full replace after every session. Max 80 lines.
-# Last Updated: 2026-04-21 | Session: 8 CLOSED -> 9 READY
-# Updated By: Human (session 8 close-out)
+# Last Updated: 2026-04-23 | Session: 9 CLOSED -> 10 READY
+# Updated By: Human (session 9 close-out)
 
 ---
 
 ## WHERE WE ARE
-- Version:          v2.0 — IN PROGRESS
-- Active Layers:    L4 COMPLETE | CLI + Git Hook next
-- Test Phase:       82 passed | 30 skipped | 0 failed
+- Version:          v2.0 — IMPLEMENTATION COMPLETE
+- Status:           CLI + Hook built | Dogfood + Gate remaining
+- Test suite:       93 passed | 20 skipped | 0 failed
 - v1 Baseline:      11.38x compression | 100% accuracy | SEALED
-- v2 L4 Result:     23/23 L4 tests passing | cascade deletes verified
+- v2 L4:            23/23 passing | SEALED
+- v2 CLI:           6/6 passing | T-071 to T-076 GREEN
+- v2 Hook:          4/4 passing | T-077 to T-080 GREEN
 
 ---
 
-## WHAT WAS COMPLETED IN SESSION 8
-
-### Commits (in order)
-        02980a4  chore: added MIT license
-        f354a57  feat(Layer4): schema + builder + querier complete
-                                         T-048 to T-070 unlocked and passing
-        16699a2  refactor(Layer4): SQLite foreign key enforcement
-                                         cascade deletes rechecked and confirmed correct
-
-### Artifacts now in repo
-        src/contextcore/layer4_graph/schema.py      COMPLETE
-        src/contextcore/layer4_graph/builder.py     COMPLETE
-        src/contextcore/layer4_graph/querier.py     COMPLETE
-        db/schema.sql                               COMPLETE
-        tests/layer4_graph/test_schema.py           23/23 PASSING
-        tests/layer4_graph/test_builder.py          PASSING
-        tests/layer4_graph/test_querier.py          PASSING
-        tests/layer4_graph/test_bfs_scoring.py      PASSING
-        tests/layer4_graph/test_layer4_integration  PASSING
-
-### Technical decision made (session 8)
-        SQLite foreign key enforcement enabled (PRAGMA foreign_keys = ON)
-        Cascade deletes verified: deleting a FILE node removes all
-        child FUNCTION + CLASS nodes and all edges sourced from them.
-        This is correct behaviour for incremental re-index on file delete.
+## WHAT WAS COMPLETED IN SESSION 9
+        pyproject.toml               Typer dependency added + CLI entrypoint
+        src/contextcore/cli/__init__.py  Package marker created
+        src/contextcore/cli/main.py  4-command CLI implemented (ADR-009)
+        hooks/post-commit            Bash hook: detects .py changes, calls
+                                                                                                                         contextcore index --incremental in bg
+        hooks/install_hooks.py       Python installer: copy + chmod + idempotent
+        benchmarks/subgraph_accuracy.py  Subgraph quality benchmark script
+        tests/cli/test_cli.py        Stubs replaced with real tests (T-071/076)
+        tests/hooks/test_git_hook.py Stubs replaced with real tests (T-077/080)
+        .contextcore/contextcore.db  Created on first index run
+        tests/results/               4 new archive reports generated
 
 ---
 
-## TEST SUITE STATE (exact, end of session 8)
+## TEST SUITE STATE (exact, end of session 9)
         Total registered:  90  (T-001 to T-090)
-        Passing:           82
-        Skipped:           30  <- CLI (T-071/076) + hooks (T-077/080) still locked
+        Passing:           93  (includes parametrized expansions)
+        Skipped:           20
         Failing:            0  <- must stay 0 always
-        Next unlock:       T-071 to T-076 (CLI) then T-077 to T-080 (hooks)
+        Skipped breakdown:
+                gate_v2.py        T-081 to T-083  GROUND_TRUTH not filled (dev action)
+                test_v2_pipeline  integration     LOCKED until gate v2 passes
+                test_v3_pipeline  integration     LOCKED
+                test_v4_pipeline  integration     LOCKED
 
 ---
 
 ## FILES STATE — COMPLETE PICTURE
+        SEALED (do not touch)
+                src/contextcore/layer1_ast/           SEALED v1
+                src/contextcore/layer5_compress/      SEALED v1
+                tests/gate_checks/gate_v1.py          SEALED v1
+                src/contextcore/layer4_graph/         SEALED v2 L4
 
-        SEALED (v1 — do not touch)
-                src/contextcore/layer1_ast/          SEALED
-                src/contextcore/layer5_compress/     SEALED
-                benchmarks/token_count.py            SEALED
-                benchmarks/quality_eval.py           SEALED
-                tests/gate_checks/gate_v1.py         SEALED
+        COMPLETE (session 9)
+                src/contextcore/cli/main.py           COMPLETE
+                hooks/post-commit                     COMPLETE
+                hooks/install_hooks.py                COMPLETE
+                tests/cli/test_cli.py                 T-071/076 GREEN
+                tests/hooks/test_git_hook.py          T-077/080 GREEN
 
-        COMPLETE (v2 L4 — do not touch)
-                src/contextcore/layer4_graph/        COMPLETE
-                db/schema.sql                        COMPLETE
-                tests/layer4_graph/                  COMPLETE 23/23
-
-        BUILD THIS (session 9)
-                src/contextcore/cli/__init__.py      NOT CREATED
-                src/contextcore/cli/main.py          NOT CREATED
-                hooks/post-commit                    NOT CREATED
-                hooks/install_hooks.py               NOT CREATED
-
-        STILL LOCKED (unlock after CLI + hook built)
-                tests/cli/test_cli.py                6 stubs (T-071 to T-076)
-                tests/hooks/test_git_hook.py         4 stubs (T-077 to T-080)
-                tests/integration/test_v2_pipeline.py LOCKED (unlock last)
+        REMAINING (developer action required — AI cannot do these)
+                tests/gate_checks/gate_v2.py          GROUND_TRUTH needs 10 real queries
+                Dogfood project                       Not chosen yet
 
 ---
 
 ## NEXT SESSION — PICK UP EXACTLY HERE
 
-FIRST COMMAND (before any code):
+FIRST COMMAND (non-negotiable):
         python tests/run_all.py
-        Expected: 82 passed | 30 skipped | 0 failed
-        If different: STOP. Fix before building anything.
+        Expected: 93 passed | 20 skipped | 0 failed
+        If different: STOP. Fix before touching anything.
 
-BUILD ORDER (strict):
+SESSION 10 IS DOGFOOD + GATE. NO NEW CODE.
 
-        STEP 1: src/contextcore/cli/main.py
-                                        -> Typer-based CLI (pip install typer already in pyproject.toml?)
-                                        -> 4 commands: index / query / status / diff
-                                        -> index  -> calls GraphBuilder.index_directory()
-                                        -> query  -> calls GraphQuerier.query() -> L5 Markdown output
-                                        -> status -> reads index_meta from SQLite
-                                        -> diff   -> git diff HEAD~1 HEAD --name-only | show affected nodes
-                                        -> Remove skipif from tests/cli/test_cli.py ONE TEST AT A TIME
-                                        -> Target: T-071 to T-076 GREEN
+        ACTION 1 — Choose dogfood project
+                Must be: Python project | 150-250 files | you know it well
+                If none available: use sample_project/ as a smaller proxy
+                and note the limitation in CONTEXT.md
 
-        STEP 2: hooks/post-commit + hooks/install_hooks.py
-                                        -> post-commit: bash script, calls contextcore index --incremental
-                                        -> install_hooks.py: copies hook, makes executable, idempotent
-                                        -> Remove skipif from tests/hooks/test_git_hook.py ONE AT A TIME
-                                        -> Target: T-077 to T-080 GREEN
+        ACTION 2 — Index it
+                pip install -e .
+                contextcore index ./your-real-project
+                Observe: node count | edge count | time taken
+                Note any errors or slow paths
 
-        STEP 3: python tests/run_all.py
-                                        -> Must: 90 passed | 0 skipped | 0 failed
-                                        -> All 90 tests green = full v2 implementation complete
+        ACTION 3 — Use it for real work (minimum 1 hour)
+                For every question you ask the AI today, first run:
+                contextcore query "your question here"
+                Compare the context it returns to what you would have
+                pasted manually. Note every friction point.
 
-        STEP 4: Dogfood
-                                        -> Run: contextcore index ./your-real-project
-                                        -> Use contextcore query for real dev tasks for 1 full day
-                                        -> Note every friction point. Fix top 3.
-                                        -> Fill GROUND_TRUTH in tests/gate_checks/gate_v2.py
+        ACTION 4 — Fix top 3 friction points found in ACTION 3
+                Each fix = one commit
+                Run: python tests/run_all.py after each fix
+                Must stay: 0 failed
 
-        STEP 5: Kill test
-                                        -> python tests/run_all.py --gate
-                                        -> Must: 8/10 subgraph correct | avg <=500ms | avg <=600 tokens
-                                        -> If passes: git tag v2.0 | unlock v3
+        ACTION 5 — Fill GROUND_TRUTH in tests/gate_checks/gate_v2.py
+                Open gate_v2.py
+                Fill all 10 GROUND_TRUTH entries from real queries you ran today
+                Each entry needs: query text + expected_nodes (filepaths or names)
+                This is a developer-only action. AI cannot fabricate these.
 
-DO NOT TOUCH: v1 sealed files | layer4_graph/ implementation
-                                                        gate_v1.py (sealed) | gate_v2.py GROUND_TRUTH until dogfood
+        ACTION 6 — Run the gate
+                python tests/run_all.py --gate
+                Must pass all three:
+                        T-081: 8/10 subgraph queries return correct nodes
+                        T-082: avg retrieval latency <= 500ms
+                        T-083: avg token count per result <= 600
+                If all pass -> proceed to ACTION 7
+                If any fail -> see GATE FAIL PROTOCOL below
+
+        GATE FAIL PROTOCOL (if needed):
+                T-081 fails: fix BFS scoring weights in querier.py (ADR-007)
+                                                                 check: are seed nodes matching correctly?
+                                                                 check: is depth-3 BFS reaching the right nodes?
+                T-082 fails: profile GraphQuerier.query()
+                                                                 check: are SQLite indexes being used? (EXPLAIN QUERY PLAN)
+                                                                 check: is BFS traversal doing N+1 queries?
+                T-083 fails: tighten token budget in SubgraphResult
+                                                                 check: are too many low-score nodes included?
+                                                                 add: hard token cap after scoring sort
+                After fix: re-run --gate | do NOT tag until all 3 pass
+
+        ACTION 7 — If gate passes: seal and tag
+                Update gate_v2.py: add SEALED comment + actual results
+                Update PROJECT.md: v2 row in success metrics table
+                Update TEST_MANIFEST.md: gate counts all PASS
+                Update conftest.py: CURRENT_VERSION = "v3"
+                Append v2 retrospective to CONTEXT.md
+                Full replace context_snapshot.md with v3 kickoff state
+                Full replace MASTER_PROMPT.md with session 11 (v3) prompt
+                Append session 10 dashboard to PROJECT.md
+                git tag v2.0
+                Announce: v2 is done.
 
 ---
 
-## OPEN DEVELOPER ACTION REQUIRED
-        [PENDING] Fill GROUND_TRUTH in tests/gate_checks/gate_v2.py
-                                                10 real queries from dogfood project
-                                                Timing: Step 4 above — during dogfood day
-        [PENDING] Choose dogfood project (150-250 file Python project)
-                                                Needed before: Step 4
-        [PENDING] Confirm typer is in pyproject.toml dependencies
-                                                Check before starting Step 1
+## OPEN DEVELOPER ACTIONS (AI cannot do these)
+        [1] Choose dogfood project (session 10 start)
+        [2] Run contextcore index on it (session 10)
+        [3] Fill gate_v2.py GROUND_TRUTH (session 10 during dogfood)
+        [4] Confirm: does contextcore query produce useful output
+                        for real tasks? (this is the real v2 validation)

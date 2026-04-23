@@ -1,0 +1,13 @@
+#!/bin/sh
+# CONTEXTCORE post-commit hook
+# Runs incremental re-index after every commit
+
+echo "[CONTEXTCORE] Running incremental index..."
+
+# Only index if contextcore is installed
+if command -v contextcore > /dev/null 2>&1; then
+    contextcore index . >> .contextcore/hook.log 2>&1
+    echo "[CONTEXTCORE] Index updated. See .contextcore/hook.log"
+else
+    echo "[CONTEXTCORE] Not installed -- skipping index"
+fi

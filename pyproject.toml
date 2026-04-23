@@ -23,6 +23,7 @@ classifiers = [
 dependencies = [
     "tree-sitter>=0.23",
     "tree-sitter-python>=0.23",
+    "typer>=0.12",
 ]
 
 [project.optional-dependencies]
@@ -33,6 +34,9 @@ dev = [
 bench = [
     "tiktoken>=0.7",
 ]
+
+[project.scripts]
+contextcore = "contextcore.cli.main:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]
