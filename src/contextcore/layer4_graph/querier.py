@@ -156,6 +156,10 @@ class GraphQuerier:
             ).fetchall()
             
             for row in rows:
+                filepath_lower = row["filepath"].replace("\\", "/").lower()
+                if filepath_lower.startswith("sample_project/"):
+                    continue
+
                 name_lower = row["name"].lower()
                 score = 0.0
                 
