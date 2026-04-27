@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from time import perf_counter
+from typing import Optional
 
 import pytest
 
@@ -19,19 +20,70 @@ class LabeledIntentPrompt:
     id: str
     prompt: str
     expected_task_type: str
+    notes: Optional[str] = None
 
 
 GROUND_TRUTH: list[LabeledIntentPrompt] = [
-    LabeledIntentPrompt("ip-01", "[FILL IN]", "[FILL IN]"),
-    LabeledIntentPrompt("ip-02", "[FILL IN]", "[FILL IN]"),
-    LabeledIntentPrompt("ip-03", "[FILL IN]", "[FILL IN]"),
-    LabeledIntentPrompt("ip-04", "[FILL IN]", "[FILL IN]"),
-    LabeledIntentPrompt("ip-05", "[FILL IN]", "[FILL IN]"),
-    LabeledIntentPrompt("ip-06", "[FILL IN]", "[FILL IN]"),
-    LabeledIntentPrompt("ip-07", "[FILL IN]", "[FILL IN]"),
-    LabeledIntentPrompt("ip-08", "[FILL IN]", "[FILL IN]"),
-    LabeledIntentPrompt("ip-09", "[FILL IN]", "[FILL IN]"),
-    LabeledIntentPrompt("ip-10", "[FILL IN]", "[FILL IN]"),
+    LabeledIntentPrompt(
+        "ip-01",
+        "Why is my BFS subgraph missing edges after indexing?",
+        "DEBUG",
+        "Troubleshooting missing retrieval edges and indexing behavior.",
+    ),
+    LabeledIntentPrompt(
+        "ip-02",
+        "The query command returns irrelevant nodes - where should I debug scoring?",
+        "DEBUG",
+        "Asks where to debug ranking relevance logic.",
+    ),
+    LabeledIntentPrompt(
+        "ip-03",
+        "Refactor the querier scoring function to be easier to tune.",
+        "REFACTOR",
+        "Explicit refactor request focused on code structure.",
+    ),
+    LabeledIntentPrompt(
+        "ip-04",
+        "Rename GraphNode fields for clarity without changing behavior.",
+        "REFACTOR",
+        "Rename-only change preserving behavior.",
+    ),
+    LabeledIntentPrompt(
+        "ip-05",
+        "Add a new output section to the Markdown emitter.",
+        "SCAFFOLD",
+        "Feature-add task to create new output structure.",
+    ),
+    LabeledIntentPrompt(
+        "ip-06",
+        "Scaffold a new layer module for intent routing.",
+        "SCAFFOLD",
+        "Greenfield module creation request.",
+    ),
+    LabeledIntentPrompt(
+        "ip-07",
+        "Where do I start to understand how indexing builds the SQLite graph?",
+        "ONBOARD",
+        "Onboarding request to understand system flow.",
+    ),
+    LabeledIntentPrompt(
+        "ip-08",
+        "Summarize what the post-commit hook does and where it is installed.",
+        "REVIEW",
+        "Review-style summary of existing behavior and install path.",
+    ),
+    LabeledIntentPrompt(
+        "ip-09",
+        "Check the codebase for any accidental telemetry or network calls.",
+        "SECURITY",
+        "Security/privacy audit for exfiltration and network behavior.",
+    ),
+    LabeledIntentPrompt(
+        "ip-10",
+        "Are we ever sending source code off-machine? Show enforcement points.",
+        "SECURITY",
+        "Security assurance and policy enforcement audit request.",
+    ),
 ]
 
 _GROUND_TRUTH_FILLED = all(

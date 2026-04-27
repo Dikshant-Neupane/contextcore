@@ -1,11 +1,11 @@
 # TEST_MANIFEST.md
 > Living document — updated each time a phase gate is passed.
-> Last updated: Session 10 (2026-04-27)
+> Last updated: Session 12 (2026-04-27)
 > Status: **v1 ✅ SEALED** | **v2 ✅ SEALED** | **v3 🟡 ACTIVE** | **v4 🔒 LOCKED**
 
 ---
 
-## TEST COUNT BY PHASE (updated session 10)
+## TEST COUNT BY PHASE (updated session 12)
 
 | Phase       | Registered | Passing | Failing | Skipped | Notes              |
 |-------------|-----------|---------|---------|---------|-------------------|
@@ -15,11 +15,11 @@
 | v2 — Hook   | 4         | 4       | 0       | 0       | COMPLETE session 9 |
 | v2 — Gate   | 3         | 3       | 0       | 0       | SEALED session 10  |
 | integration | —         | 17      | 0       | 13      | v2 unlocked        |
-| **Total**   | **96**    | **107** | **0**   | **12**  | parametrized +11   |
+| **Total**   | **98**    | **111** | **0**   | **10**  | parametrized +13   |
 
-Last full run:  107 passed | 12 skipped | 0 failed
+Last full run:  111 passed | 10 skipped | 0 failed
 Command:        python tests/run_all.py
-Date:           2026-04-27 (Session 11 close)
+Date:           2026-04-27 (Session 12 close)
 
 Note on count: 93 > 90 registered because parametrized tests in
 conftest.py expand some fixtures into multiple cases at runtime.
@@ -251,6 +251,8 @@ Both are correct. The number that matters is: 0 failed.
 | T-094 | test_classify_onboard_query                     | layer3_intent/test_classifier.py  | v3    | ✅ PASS |
 | T-095 | test_classify_review_and_security_queries       | layer3_intent/test_classifier.py  | v3    | ✅ PASS |
 | T-096 | test_classifier_handles_ambiguous_or_empty_text | layer3_intent/test_classifier.py  | v3    | ✅ PASS |
+| T-097 | test_classifier_priority_rules_debug_over_onboard | layer3_intent/test_classifier.py | v3    | ✅ PASS |
+| T-098 | test_classifier_priority_rules_security_and_summary | layer3_intent/test_classifier.py | v3    | ✅ PASS |
 
 ---
 
@@ -258,8 +260,8 @@ Both are correct. The number that matters is: 0 failed.
 
 | ID    | Test name                                | File                   | Phase | Status |
 |-------|------------------------------------------|------------------------|-------|--------|
-| G3-01 | test_v3_gate_intent_accuracy_7_of_10     | gate_checks/gate_v3.py | v3    | ⏭ SKIP (GROUND_TRUTH empty) |
-| G3-02 | test_v3_gate_latency_under_150ms         | gate_checks/gate_v3.py | v3    | ⏭ SKIP (GROUND_TRUTH empty) |
+| G3-01 | test_v3_gate_intent_accuracy_7_of_10     | gate_checks/gate_v3.py | v3    | ✅ PASS (10/10) |
+| G3-02 | test_v3_gate_latency_under_150ms         | gate_checks/gate_v3.py | v3    | ✅ PASS |
 | G3-03 | test_v3_gate_artifacts_exist             | gate_checks/gate_v3.py | v3    | ✅ PASS |
 
 ---
