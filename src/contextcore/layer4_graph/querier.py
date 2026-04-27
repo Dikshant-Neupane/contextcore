@@ -8,6 +8,7 @@ import sqlite3
 import time
 from collections import deque
 from pathlib import Path
+import re
 
 from contextcore.layer4_graph.schema import GraphEdge, GraphNode, NodeType, SubgraphResult, EdgeType
 
@@ -58,6 +59,12 @@ class GraphQuerier:
     - Total tokens ≤ 600
     - Latency ≤ 500ms
     """
+
+    _STOPWORDS = {
+        "a", "an", "and", "are", "as", "at", "be", "by", "do", "does", "for", "from",
+        "how", "i", "in", "is", "it", "new", "not", "of", "on", "or", "the", "to", "what",
+        "where", "why", "with",
+    }
 
     def __init__(self, db_path: Path | str) -> None:
         """Initialize querier pointing to SQLite graph DB."""
@@ -150,6 +157,25 @@ class GraphQuerier:
         try:
             # Search for exact and substring matches on node name
             query_lower = query.lower()
+            query_terms = [
+                term for term in re.findall(r"[a-z0-9_]+", query_lower)
+                if term not in self._STOPWORDS and len(term) >= 3
+            ]
+
+            topical_boosts = {
+                "cli": "src/contextcore/cli/",
+                "command": "src/contextcore/cli/",
+                "hook": "hooks/",
+                "commit": "hooks/",
+                "subgraph": "src/contextcore/layer4_graph/",
+                "scoring": "src/contextcore/layer4_graph/querier.py",
+                "score": "src/contextcore/layer4_graph/querier.py",
+                "edge": "src/contextcore/layer4_graph/",
+                "foreign": "src/contextcore/layer4_graph/",
+                "emitter": "src/contextcore/layer5_compress/",
+                "format": "src/contextcore/layer5_compress/",
+                "output": "src/contextcore/layer5_compress/",
+            }
             seeds = []
             
             rows = conn.execute(
@@ -167,12 +193,25 @@ class GraphQuerier:
                 # Exact match on name
                 if name_lower == query_lower:
                     score = 1.0
-                # Substring match on name
-                elif query_lower in name_lower or name_lower in query_lower:
-                    score = 0.8
-                # Match on filepath
-                elif query_lower in row["filepath"].lower():
+                # Query keyword matches on name/filepath
+                elif any(term == name_lower for term in query_terms):
+                    score = 0.95
+                elif any(term in name_lower for term in query_terms):
+                    score = 0.85
+                elif any(term in filepath_lower for term in query_terms):
+                    score = 0.75
+                # Fallback whole-query filepath match
+                elif query_lower in filepath_lower:
                     score = 0.6
+
+                # Domain-specific boosts for known project areas
+                if score > 0:
+                    for term, path_hint in topical_boosts.items():
+                        if term in query_terms and path_hint in filepath_lower:
+                            score += 0.2
+
+                    # Keep scores bounded
+                    score = min(score, 1.0)
                 
                 if score > 0:
                     # Type bonus: functions and methods are scored slightly higher
