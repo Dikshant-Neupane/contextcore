@@ -66,7 +66,7 @@ class GraphQuerier:
         "where", "why", "with",
     }
 
-    def __init__(self, db_path: Path | str) -> None:
+    def __init__(self, db_path: Path | str = ".contextcore/contextcore.db") -> None:
         """Initialize querier pointing to SQLite graph DB."""
         self.db_path = Path(db_path)
 
@@ -162,20 +162,31 @@ class GraphQuerier:
                 if term not in self._STOPWORDS and len(term) >= 3
             ]
 
-            topical_boosts = {
-                "cli": "src/contextcore/cli/",
-                "command": "src/contextcore/cli/",
-                "hook": "hooks/",
-                "commit": "hooks/",
-                "subgraph": "src/contextcore/layer4_graph/",
-                "scoring": "src/contextcore/layer4_graph/querier.py",
-                "score": "src/contextcore/layer4_graph/querier.py",
-                "edge": "src/contextcore/layer4_graph/",
-                "foreign": "src/contextcore/layer4_graph/",
-                "emitter": "src/contextcore/layer5_compress/",
-                "format": "src/contextcore/layer5_compress/",
-                "output": "src/contextcore/layer5_compress/",
-            }
+            topical_boosts = [
+                ("cli", "src/contextcore/cli/"),
+                ("command", "src/contextcore/cli/"),
+                ("hook", "hooks/"),
+                ("commit", "hooks/"),
+                ("subgraph", "src/contextcore/layer4_graph/querier.py"),
+                ("scoring", "src/contextcore/layer4_graph/querier.py"),
+                ("score", "src/contextcore/layer4_graph/querier.py"),
+                ("edge", "src/contextcore/layer4_graph/schema.py"),
+                ("edge", "src/contextcore/layer4_graph/builder.py"),
+                ("edge", "src/contextcore/layer4_graph/querier.py"),
+                ("graph", "src/contextcore/layer4_graph/"),
+                ("node", "src/contextcore/layer4_graph/"),
+                ("type", "src/contextcore/layer4_graph/schema.py"),
+                ("registered", "src/contextcore/layer4_graph/"),
+                ("foreign", "src/contextcore/layer4_graph/schema.py"),
+                ("foreign", "src/contextcore/layer4_graph/builder.py"),
+                ("key", "src/contextcore/layer4_graph/schema.py"),
+                ("key", "src/contextcore/layer4_graph/builder.py"),
+                ("enforcement", "src/contextcore/layer4_graph/schema.py"),
+                ("enforcement", "src/contextcore/layer4_graph/builder.py"),
+                ("emitter", "src/contextcore/layer5_compress/"),
+                ("format", "src/contextcore/layer5_compress/"),
+                ("output", "src/contextcore/layer5_compress/"),
+            ]
             seeds = []
             
             rows = conn.execute(
@@ -204,9 +215,16 @@ class GraphQuerier:
                 elif query_lower in filepath_lower:
                     score = 0.6
 
+                # Bootstrap domain matches when natural language is abstract.
+                if score == 0:
+                    for term, path_hint in topical_boosts:
+                        if term in query_terms and path_hint in filepath_lower:
+                            score = 0.65
+                            break
+
                 # Domain-specific boosts for known project areas
                 if score > 0:
-                    for term, path_hint in topical_boosts.items():
+                    for term, path_hint in topical_boosts:
                         if term in query_terms and path_hint in filepath_lower:
                             score += 0.2
 
