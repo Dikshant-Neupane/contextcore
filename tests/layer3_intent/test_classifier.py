@@ -42,3 +42,15 @@ def test_classifier_handles_ambiguous_or_empty_text() -> None:
     assert empty.task_type == TaskType.REVIEW
     assert ambiguous.confidence <= 0.35
     assert empty.confidence <= 0.35
+
+
+def test_classifier_priority_rules_debug_over_onboard() -> None:
+    result = classify_query("where should I debug missing edges after indexing")
+    assert result.task_type == TaskType.DEBUG
+
+
+def test_classifier_priority_rules_security_and_summary() -> None:
+    security = classify_query("check telemetry and network calls in this repo")
+    review = classify_query("summarize what the post-commit hook does")
+    assert security.task_type == TaskType.SECURITY
+    assert review.task_type == TaskType.REVIEW

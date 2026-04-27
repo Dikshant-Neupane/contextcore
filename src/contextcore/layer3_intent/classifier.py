@@ -11,12 +11,24 @@ TOKEN_PATTERN = re.compile(r"[a-z0-9_]+")
 AMBIGUOUS_CONFIDENCE = 0.20
 
 KEYWORDS: dict[TaskType, tuple[str, ...]] = {
-    TaskType.DEBUG: ("debug", "error", "bug", "fix", "fail", "trace", "exception"),
+    TaskType.DEBUG: ("debug", "error", "bug", "fix", "fail", "trace", "exception", "missing"),
     TaskType.REFACTOR: ("refactor", "rename", "extract", "cleanup", "simplify", "organize"),
     TaskType.SCAFFOLD: ("add", "create", "new", "implement", "build", "generate"),
-    TaskType.ONBOARD: ("where", "overview", "explain", "understand", "entry", "flow"),
-    TaskType.REVIEW: ("review", "inspect", "audit", "score", "quality", "format"),
-    TaskType.SECURITY: ("security", "vulnerability", "auth", "permission", "secret", "rbac"),
+    TaskType.ONBOARD: ("where", "overview", "explain", "understand", "entry", "flow", "start"),
+    TaskType.REVIEW: ("review", "inspect", "audit", "score", "quality", "format", "summarize", "summary"),
+    TaskType.SECURITY: (
+        "security",
+        "vulnerability",
+        "auth",
+        "permission",
+        "secret",
+        "rbac",
+        "telemetry",
+        "network",
+        "off",
+        "machine",
+        "enforcement",
+    ),
 }
 
 
@@ -31,9 +43,38 @@ def classify_query(query: str) -> IntentResult:
         return IntentResult(query=query, task_type=TaskType.REVIEW, confidence=AMBIGUOUS_CONFIDENCE, rationale="no lexical tokens")
 
     scores = _score_by_keywords(tokens)
+    override_task = _priority_override(tokens, cleaned)
+    if override_task is not None:
+        confidence = 0.85
+        rationale = f"selected={override_task.value}; priority-rule"
+        return IntentResult(query=query, task_type=override_task, confidence=confidence, rationale=rationale)
+
     selected, confidence = _select_task(scores)
     rationale = _build_rationale(selected, scores)
     return IntentResult(query=query, task_type=selected, confidence=confidence, rationale=rationale)
+
+
+def _priority_override(tokens: list[str], cleaned: str) -> TaskType | None:
+    """Apply deterministic precedence rules for high-signal intent markers."""
+    token_set = set(tokens)
+
+    security_markers = {"security", "telemetry", "network", "exfiltration", "rbac"}
+    if token_set.intersection(security_markers):
+        return TaskType.SECURITY
+    if "off-machine" in cleaned or "off machine" in cleaned:
+        return TaskType.SECURITY
+    if "sending source code" in cleaned:
+        return TaskType.SECURITY
+
+    debug_markers = {"debug", "error", "failing", "missing", "fail"}
+    if token_set.intersection(debug_markers):
+        return TaskType.DEBUG
+
+    review_markers = {"summarize", "summary", "review"}
+    if token_set.intersection(review_markers):
+        return TaskType.REVIEW
+
+    return None
 
 
 def _score_by_keywords(tokens: list[str]) -> dict[TaskType, int]:
