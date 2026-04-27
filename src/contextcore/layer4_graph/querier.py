@@ -77,7 +77,13 @@ class GraphQuerier:
         conn.execute("PRAGMA foreign_keys = ON")  # Enable foreign key constraints
         return conn
 
-    def query(self, text: str, token_budget: int = 600, max_latency_ms: int = 500) -> SubgraphResult:
+    def query(
+        self,
+        text: str,
+        token_budget: int = 600,
+        max_latency_ms: int = 500,
+        task_type: str | None = None,
+    ) -> SubgraphResult:
         """
         Semantic search on the graph using BFS ranking.
         
@@ -95,8 +101,8 @@ class GraphQuerier:
         """
         t0 = time.perf_counter()
         
-        # Step 1: Infer task type and find seed nodes (direct matches on name/filepath/docstring)
-        task_type = self._infer_task_type(text)
+        # Step 1: Select task type and find seed nodes (direct matches on name/filepath/docstring)
+        selected_task_type = self._normalize_task_type(task_type) if task_type else self._infer_task_type(text)
         seeds = self._find_seed_nodes(text)
         if not seeds:
             # No direct matches found, return empty result
@@ -115,7 +121,7 @@ class GraphQuerier:
         self._bfs_expand(all_nodes, max_depth=3)
         
         # Step 3: Rank nodes by (depth, score) — closer and higher-scored first
-        ranked = self._rank_nodes(all_nodes, seeds, task_type=task_type)  # Returns [(node, score), ...]
+        ranked = self._rank_nodes(all_nodes, seeds, task_type=selected_task_type)  # Returns [(node, score), ...]
         
         # Step 4: Trim to token budget
         trimmed_nodes = []
@@ -377,6 +383,12 @@ class GraphQuerier:
         if any(term in q for term in ("refactor", "rename", "extract", "clean up")):
             return "REFACTOR"
         return "ONBOARD"
+
+    def _normalize_task_type(self, task_type: str) -> str:
+        """Normalize explicit task type input to known values."""
+        value = task_type.strip().upper()
+        allowed = {"DEBUG", "REFACTOR", "SCAFFOLD", "ONBOARD", "REVIEW", "SECURITY"}
+        return value if value in allowed else "ONBOARD"
 
     def _estimate_tokens(self, node: GraphNode) -> int:
         """

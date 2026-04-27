@@ -14,6 +14,7 @@ from pathlib import Path
 import typer
 
 from contextcore.layer1_ast.extractor import extract_structure
+from contextcore.layer3_intent.classifier import classify_query
 from contextcore.layer4_graph.builder import GraphBuilder
 from contextcore.layer4_graph.querier import GraphQuerier
 from contextcore.layer5_compress.emitter import emit_markdown
@@ -22,6 +23,7 @@ app = typer.Typer(add_completion=False, help="CONTEXTCORE — knowledge graph CL
 
 DB_PATH = ".contextcore/contextcore.db"
 META_PROJECT_PATH = "."
+TASK_TYPE_CHOICES = {"AUTO", "DEBUG", "REFACTOR", "SCAFFOLD", "ONBOARD", "REVIEW", "SECURITY"}
 
 
 def _get_db_path() -> Path:
@@ -43,6 +45,16 @@ def _db_stats(db_path: Path) -> tuple[int, int]:
         return node_count, edge_count
     finally:
         conn.close()
+
+
+def _resolve_task_type(query_text: str, task_type: str) -> str:
+    """Resolve task type option, using Layer 3 classifier when AUTO is selected."""
+    normalized = task_type.strip().upper()
+    if normalized not in TASK_TYPE_CHOICES:
+        raise ValueError(f"Invalid task type: {task_type}")
+    if normalized == "AUTO":
+        return classify_query(query_text).task_type.value
+    return normalized
 
 
 def _update_meta(db_path: Path, project_path: str, file_count: int) -> None:
@@ -113,6 +125,7 @@ def query(
     node_name: str = typer.Argument(..., help="Node name or keyword to search for"),
     depth: int = typer.Option(3, help="BFS depth for subgraph expansion"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
+    task_type: str = typer.Option("AUTO", "--task-type", help="AUTO or explicit task mode"),
 ) -> None:
     """Retrieve ranked subgraph for a node."""
     db_path = _get_db_path()
@@ -122,7 +135,13 @@ def query(
 
     t0 = time.perf_counter()
     querier = GraphQuerier(db_path=db_path)
-    result = querier.query(node_name)
+    try:
+        resolved_task_type = _resolve_task_type(node_name, task_type)
+    except ValueError as exc:
+        typer.echo(f"[FAIL] {exc}")
+        raise typer.Exit(code=1)
+
+    result = querier.query(node_name, task_type=resolved_task_type)
     elapsed_ms = int((time.perf_counter() - t0) * 1000)
 
     if not result.ranked_nodes:

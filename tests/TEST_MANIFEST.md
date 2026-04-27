@@ -15,11 +15,11 @@
 | v2 — Hook   | 4         | 4       | 0       | 0       | COMPLETE session 9 |
 | v2 — Gate   | 3         | 3       | 0       | 0       | SEALED session 10  |
 | integration | —         | 17      | 0       | 13      | v2 unlocked        |
-| **Total**   | **90**    | **100** | **0**   | **13**  | parametrized +10   |
+| **Total**   | **96**    | **107** | **0**   | **12**  | parametrized +11   |
 
-Last full run:  100 passed | 13 skipped | 0 failed
+Last full run:  107 passed | 12 skipped | 0 failed
 Command:        python tests/run_all.py
-Date:           2026-04-27 (Session 10 close)
+Date:           2026-04-27 (Session 11 close)
 
 Note on count: 93 > 90 registered because parametrized tests in
 conftest.py expand some fixtures into multiple cases at runtime.
@@ -241,13 +241,26 @@ Both are correct. The number that matters is: 0 failed.
 
 ---
 
-## Gate v3 (v3 🔒 LOCKED)
+## Layer 3 — Intent Engine (v3 🟡 ACTIVE)
+
+| ID    | Test name                                       | File                               | Phase | Status |
+|-------|-------------------------------------------------|------------------------------------|-------|--------|
+| T-091 | test_classify_debug_query                       | layer3_intent/test_classifier.py  | v3    | ✅ PASS |
+| T-092 | test_classify_refactor_query                    | layer3_intent/test_classifier.py  | v3    | ✅ PASS |
+| T-093 | test_classify_scaffold_query                    | layer3_intent/test_classifier.py  | v3    | ✅ PASS |
+| T-094 | test_classify_onboard_query                     | layer3_intent/test_classifier.py  | v3    | ✅ PASS |
+| T-095 | test_classify_review_and_security_queries       | layer3_intent/test_classifier.py  | v3    | ✅ PASS |
+| T-096 | test_classifier_handles_ambiguous_or_empty_text | layer3_intent/test_classifier.py  | v3    | ✅ PASS |
+
+---
+
+## Gate v3 (v3 🟡 ACTIVE)
 
 | ID    | Test name                                | File                   | Phase | Status |
 |-------|------------------------------------------|------------------------|-------|--------|
-| G3-01 | test_v3_gate_intent_accuracy_7_of_10     | gate_checks/gate_v3.py | v3    | 🔒 LOCKED |
-| G3-02 | test_v3_gate_latency_under_150ms         | gate_checks/gate_v3.py | v3    | 🔒 LOCKED |
-| G3-03 | test_v3_gate_artifacts_exist             | gate_checks/gate_v3.py | v3    | 🔒 LOCKED |
+| G3-01 | test_v3_gate_intent_accuracy_7_of_10     | gate_checks/gate_v3.py | v3    | ⏭ SKIP (GROUND_TRUTH empty) |
+| G3-02 | test_v3_gate_latency_under_150ms         | gate_checks/gate_v3.py | v3    | ⏭ SKIP (GROUND_TRUTH empty) |
+| G3-03 | test_v3_gate_artifacts_exist             | gate_checks/gate_v3.py | v3    | ✅ PASS |
 
 ---
 
