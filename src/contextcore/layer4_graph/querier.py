@@ -88,7 +88,8 @@ class GraphQuerier:
         """
         t0 = time.perf_counter()
         
-        # Step 1: Find seed nodes (direct matches on name/filepath/docstring)
+        # Step 1: Infer task type and find seed nodes (direct matches on name/filepath/docstring)
+        task_type = self._infer_task_type(text)
         seeds = self._find_seed_nodes(text)
         if not seeds:
             # No direct matches found, return empty result
@@ -107,7 +108,7 @@ class GraphQuerier:
         self._bfs_expand(all_nodes, max_depth=3)
         
         # Step 3: Rank nodes by (depth, score) — closer and higher-scored first
-        ranked = self._rank_nodes(all_nodes, seeds)  # Returns [(node, score), ...]
+        ranked = self._rank_nodes(all_nodes, seeds, task_type=task_type)  # Returns [(node, score), ...]
         
         # Step 4: Trim to token budget
         trimmed_nodes = []
@@ -272,7 +273,10 @@ class GraphQuerier:
             conn.close()
 
     def _rank_nodes(
-        self, nodes: dict, seeds: list[tuple[str, GraphNode, float]]
+        self,
+        nodes: dict,
+        seeds: list[tuple[str, GraphNode, float]],
+        task_type: str,
     ) -> list[tuple[GraphNode, float]]:
         """
         Rank nodes by (depth, relevance_score).
@@ -294,8 +298,28 @@ class GraphQuerier:
             ),
         )
         
-        # Return (node, score) tuples
-        return [(node, score) for node_id, (node, depth, score) in ranked]
+        scored_nodes = []
+        for node_id, (node, depth, score) in ranked:
+            filepath = node.filepath.replace("\\", "/").lower()
+            adjusted_score = score
+            if filepath.startswith("tests/") and task_type != "DEBUG":
+                adjusted_score *= 0.4
+            scored_nodes.append((node, adjusted_score))
+
+        return scored_nodes
+
+    def _infer_task_type(self, query: str) -> str:
+        """Infer a coarse task type from query text for ranking adjustments."""
+        q = query.lower()
+        if any(term in q for term in ("debug", "error", "fail", "why", "validate")):
+            return "DEBUG"
+        if any(term in q for term in ("add", "new", "create", "register", "scaffold")):
+            return "SCAFFOLD"
+        if any(term in q for term in ("review", "how is", "what does", "format")):
+            return "REVIEW"
+        if any(term in q for term in ("refactor", "rename", "extract", "clean up")):
+            return "REFACTOR"
+        return "ONBOARD"
 
     def _estimate_tokens(self, node: GraphNode) -> int:
         """
