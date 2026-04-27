@@ -229,8 +229,17 @@ class GraphQuerier:
                     "SELECT target_id FROM edges WHERE source_id = ?",
                     (current_id,),
                 ).fetchall()
+
+                reverse_calls = conn.execute(
+                    "SELECT source_id FROM edges WHERE target_id = ? AND edge_type = 'CALLS'",
+                    (current_id,),
+                ).fetchall()
                 
-                neighbors = [row[0] for row in incoming] + [row[0] for row in outgoing]
+                neighbors = (
+                    [row[0] for row in incoming]
+                    + [row[0] for row in outgoing]
+                    + [row[0] for row in reverse_calls]
+                )
                 
                 for neighbor_id in set(neighbors):
                     if neighbor_id not in visited:
