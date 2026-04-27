@@ -2,33 +2,40 @@
 
 AST-first context infrastructure for AI coding workflows.
 
-- v1 sealed: 11.38x compression, 100% quality accuracy
-- v2 sealed: gate passed (10/10 accuracy, 10.8ms avg latency, 577 avg tokens)
-- v3 kickoff: Layer 3 intent classifier scaffold implemented
-- local-first: source code never leaves your machine
+CONTEXTCORE converts raw source trees into compact, structurally meaningful context so assistants receive less noise and more relevant signals.
+
+## Highlights
+
+- v1 sealed: 11.38x compression, 100% eval accuracy
+- v2 sealed: gate passed (10/10 subgraph accuracy, 10.8ms avg latency, 577 avg tokens)
+- v3 active: Layer 3 intent classifier integrated in query path
+- local-first by design: source code stays on your machine
 
 ## Current status
 
 | Track | Status |
 |---|---|
 | v1 | SEALED (tag: v1.0) |
-| v2 | SEALED (L4 + CLI + hooks + gate) |
-| v3 | ACTIVE (L3 classifier + integration started) |
-| Full active suite | 107 passed, 12 skipped, 0 failed |
+| v2 | SEALED (tag: v2.0) |
+| v3 | ACTIVE (intent routing + v3 gate labels) |
+| Active suite | 111 passed, 10 skipped, 0 failed |
+| Gate suite | 11 passed, 3 skipped, 0 failed |
 
-## Why CONTEXTCORE exists
+## Why this exists
 
-Raw file dumps waste context window and cost tokens. CONTEXTCORE reduces code to structural, task-relevant context before it reaches an assistant.
+Raw file dumps are expensive and low-signal for assistants. CONTEXTCORE enforces a layered pipeline to deliver smaller, task-relevant context with measurable quality gates.
 
-## Architecture (roadmap)
+## Architecture
 
-1. L1: static AST extraction (Tree-sitter)
-2. L2: temporal graph (planned)
-3. L3: intent routing (planned)
-4. L4: dependency graph and retrieval (active)
-5. L5: compact markdown emission
+1. L1 static AST extraction (Tree-sitter)
+2. L2 temporal graph (planned)
+3. L3 intent routing (active)
+4. L4 dependency graph retrieval (sealed)
+5. L5 compact markdown emission (sealed)
 
-## v1 results (sealed)
+## Proven results
+
+### v1 gate (sealed)
 
 | Metric | Result | Target |
 |---|---|---|
@@ -36,27 +43,45 @@ Raw file dumps waste context window and cost tokens. CONTEXTCORE reduces code to
 | Accuracy on eval set | 10/10 (100%) | >=80% |
 | Parse failures | 0/20 files | 0 |
 
+### v2 gate (sealed)
+
+| Metric | Result | Target |
+|---|---|---|
+| Subgraph accuracy | 10/10 | >=8/10 |
+| Average latency | 10.8ms | <=500ms |
+| Average tokens | 577 | <=600 |
+
 ## Quick start
 
 ```bash
 pip install -e ".[dev]"
 python tests/run_all.py
+python tests/run_all.py --gate
 ```
 
-## Documentation index
+## CLI usage
 
-- [CLAUDE.md](CLAUDE.md): project operating rules
-- [PROJECT.md](PROJECT.md): roadmap and session dashboards
-- [CONTEXT.md](CONTEXT.md): session log and tracker
-- [DECISIONS.md](DECISIONS.md): ADR history
+```bash
+contextcore index ./sample_project
+contextcore status
+contextcore query "where does token counting happen"
+contextcore diff
+```
+
+## Documentation map
+
+- [PROJECT.md](PROJECT.md): roadmap and version dashboards
+- [CONTEXT.md](CONTEXT.md): session log and benchmark tracker
+- [DECISIONS.md](DECISIONS.md): architecture decisions (ADRs)
+- [tests/TEST_MANIFEST.md](tests/TEST_MANIFEST.md): test inventory and gate map
 - [.contextcore/context_snapshot.md](.contextcore/context_snapshot.md): current execution snapshot
-- [tests/TEST_MANIFEST.md](tests/TEST_MANIFEST.md): phase test map and unlock order
+- [CLAUDE.md](CLAUDE.md): operational rules used during implementation
 
 ## Safety and privacy
 
 - local processing only
 - no source-code telemetry
-- no external API calls with source content
+- no external API calls with source code content
 
 ## License
 
