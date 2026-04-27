@@ -55,3 +55,9 @@ Thumbs.db
 *.so
 *.dll
 *.dylib
+
+# Contextcore generated local artifacts
+.contextcore/contextcore.db
+.contextcore/hook.log
+tests/results/latest.md
+tests/results/archive/
