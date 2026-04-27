@@ -20,7 +20,7 @@ RESULTS_DIR  = REPO_ROOT / "tests" / "results"
 DB_PATH      = REPO_ROOT / ".contextcore" / "contextcore.db"
 
 # ─── Phase lock ────────────────────────────────────────────────────────────
-CURRENT_VERSION = "v2"      # ← AI: update this when a gate passes
+CURRENT_VERSION = "v3"      # ← AI: update this when a gate passes
 
 VERSION_ORDER = ["v1", "v2", "v3", "v4"]
 

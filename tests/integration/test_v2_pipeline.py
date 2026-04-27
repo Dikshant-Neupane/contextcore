@@ -1,15 +1,10 @@
 """
-v2 pipeline integration test — LOCKED until v2 gate passes.
-Phase: v2 🔒 LOCKED
+v2 pipeline integration test.
+Phase: v2 unlocked
 Requires: src/contextcore/layer4_graph/ implementation
 """
 
 import pytest
-
-pytestmark = pytest.mark.skip(
-    reason="v2 locked — Layer 4 (dependency graph) not yet implemented. "
-           "Complete gate_v2 kill tests to unlock."
-)
 
 
 def test_full_l1_l4_l5_pipeline():

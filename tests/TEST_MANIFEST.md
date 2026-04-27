@@ -1,11 +1,11 @@
 # TEST_MANIFEST.md
 > Living document — updated each time a phase gate is passed.
-> Last updated: Session 7 (2026-04-21)
-> Status: **v1 ✅ SEALED** | **v2 🟡 ACTIVE** | **v3 🔒 LOCKED** | **v4 🔒 LOCKED**
+> Last updated: Session 10 (2026-04-27)
+> Status: **v1 ✅ SEALED** | **v2 ✅ SEALED** | **v3 🟡 ACTIVE** | **v4 🔒 LOCKED**
 
 ---
 
-## TEST COUNT BY PHASE (updated session 9)
+## TEST COUNT BY PHASE (updated session 10)
 
 | Phase       | Registered | Passing | Failing | Skipped | Notes              |
 |-------------|-----------|---------|---------|---------|-------------------|
@@ -13,13 +13,13 @@
 | v2 — L4     | 23        | 23      | 0       | 0       | SEALED session 8   |
 | v2 — CLI    | 6         | 6       | 0       | 0       | COMPLETE session 9 |
 | v2 — Hook   | 4         | 4       | 0       | 0       | COMPLETE session 9 |
-| v2 — Gate   | 3         | 0       | 0       | 3       | GROUND_TRUTH empty |
-| integration | —         | 13      | 0       | 17      | v2+ locked         |
-| **Total**   | **90**    | **93**  | **0**   | **20**  | parametrized +3    |
+| v2 — Gate   | 3         | 3       | 0       | 0       | SEALED session 10  |
+| integration | —         | 17      | 0       | 13      | v2 unlocked        |
+| **Total**   | **90**    | **100** | **0**   | **13**  | parametrized +10   |
 
-Last full run:  93 passed | 20 skipped | 0 failed
+Last full run:  100 passed | 13 skipped | 0 failed
 Command:        python tests/run_all.py
-Date:           2026-04-23 (Session 9 close)
+Date:           2026-04-27 (Session 10 close)
 
 Note on count: 93 > 90 registered because parametrized tests in
 conftest.py expand some fixtures into multiple cases at runtime.
@@ -193,16 +193,16 @@ Both are correct. The number that matters is: 0 failed.
 
 ---
 
-## Gate v2 — Kill Tests (v2 🟡 PENDING)
+## Gate v2 — Kill Tests (v2 ✅ SEALED 2026-04-27)
 
-> Fill in `GROUND_TRUTH` in `gate_checks/gate_v2.py` before running.
+> Gate result: 10/10 accuracy | 10.8ms avg latency | 577 avg tokens
 
 | ID    | Test name                                  | File                   | Phase | Status |
 |-------|--------------------------------------------|------------------------|-------|--------|
-| G2-01 | test_v2_gate_subgraph_accuracy_8_of_10     | gate_checks/gate_v2.py | v2    | ⬜ TODO |
-| G2-02 | test_v2_gate_avg_latency_under_500ms       | gate_checks/gate_v2.py | v2    | ⬜ TODO |
-| G2-03 | test_v2_gate_avg_tokens_under_600          | gate_checks/gate_v2.py | v2    | ⬜ TODO |
-| G2-04 | test_v2_gate_artifacts_exist               | gate_checks/gate_v2.py | v2    | ⚠ xfail (artifacts pending) |
+| G2-01 | test_v2_gate_subgraph_accuracy_8_of_10     | gate_checks/gate_v2.py | v2    | ✅ PASS |
+| G2-02 | test_v2_gate_avg_latency_under_500ms       | gate_checks/gate_v2.py | v2    | ✅ PASS |
+| G2-03 | test_v2_gate_avg_tokens_under_600          | gate_checks/gate_v2.py | v2    | ✅ PASS |
+| G2-04 | test_v2_gate_artifacts_exist               | gate_checks/gate_v2.py | v2    | ✅ PASS |
 
 ---
 
@@ -230,14 +230,14 @@ Both are correct. The number that matters is: 0 failed.
 
 ---
 
-## Integration — v2 Pipeline (v2 🔒 LOCKED)
+## Integration — v2 Pipeline (v2 ✅ UNLOCKED)
 
 | ID    | Test name                               | File                             | Phase | Status |
 |-------|-----------------------------------------|----------------------------------|-------|--------|
-| T-081 | test_full_l1_l4_l5_pipeline             | integration/test_v2_pipeline.py  | v2    | 🔒 LOCKED |
-| T-082 | test_v2_pipeline_returns_subgraph       | integration/test_v2_pipeline.py  | v2    | 🔒 LOCKED |
-| T-083 | test_v2_pipeline_within_token_budget    | integration/test_v2_pipeline.py  | v2    | 🔒 LOCKED |
-| T-084 | test_v2_pipeline_latency_under_500ms    | integration/test_v2_pipeline.py  | v2    | 🔒 LOCKED |
+| T-081 | test_full_l1_l4_l5_pipeline             | integration/test_v2_pipeline.py  | v2    | ✅ PASS |
+| T-082 | test_v2_pipeline_returns_subgraph       | integration/test_v2_pipeline.py  | v2    | ✅ PASS |
+| T-083 | test_v2_pipeline_within_token_budget    | integration/test_v2_pipeline.py  | v2    | ✅ PASS |
+| T-084 | test_v2_pipeline_latency_under_500ms    | integration/test_v2_pipeline.py  | v2    | ✅ PASS |
 
 ---
 
@@ -302,15 +302,15 @@ python tests/run_all.py --full
 ## Gate completion checklist
 
 To seal v2 and unlock v3:
-- [ ] Implement `src/contextcore/layer4_graph/schema.py`
-- [ ] Implement `src/contextcore/layer4_graph/builder.py`
-- [ ] Implement `src/contextcore/layer4_graph/querier.py`
-- [ ] Implement `src/contextcore/cli/`
-- [ ] Implement `hooks/post-commit` + `hooks/install_hooks.py`
-- [ ] Fill in `GROUND_TRUTH` in `gate_checks/gate_v2.py` (10 real dogfood queries)
-- [ ] Remove `pytestmark = pytest.mark.skip` from layer4_graph, cli, hooks tests
-- [ ] Run `python tests/run_all.py --gate` and confirm G2-01 through G2-04 pass
-- [ ] Commit with tag `v2`
+- [x] Implement `src/contextcore/layer4_graph/schema.py`
+- [x] Implement `src/contextcore/layer4_graph/builder.py`
+- [x] Implement `src/contextcore/layer4_graph/querier.py`
+- [x] Implement `src/contextcore/cli/`
+- [x] Implement `hooks/post-commit` + `hooks/install_hooks.py`
+- [x] Fill in `GROUND_TRUTH` in `gate_checks/gate_v2.py` (10 real dogfood queries)
+- [x] Remove `pytestmark = pytest.mark.skip` from layer4_graph, cli, hooks tests
+- [x] Run `python tests/run_all.py --gate` and confirm G2-01 through G2-04 pass
+- [x] Commit with tag `v2`
 
 ---
 
@@ -325,8 +325,8 @@ To seal v2 and unlock v3:
 | tests/layer4_graph/test_layer4_int.py   | T-069/070  | [DONE] PASS         | 8       |
 | tests/cli/test_cli.py                   | T-071/076  | [DONE] PASS         | 9       |
 | tests/hooks/test_git_hook.py            | T-077/080  | [DONE] PASS         | 9       |
-| tests/gate_checks/gate_v2.py            | T-081/083  | [PENDING] dev fills | 10      |
-| tests/integration/test_v2_pipeline.py   | —          | [LOCKED] post-gate  | 10      |
+| tests/gate_checks/gate_v2.py            | T-081/083  | [DONE] PASS         | 10      |
+| tests/integration/test_v2_pipeline.py   | —          | [DONE] PASS         | 10      |
 | tests/integration/test_v3_pipeline.py   | —          | [LOCKED] v3         | —       |
 | tests/integration/test_v4_pipeline.py   | —          | [LOCKED] v4         | —       |
 
