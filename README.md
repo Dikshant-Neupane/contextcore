@@ -4,6 +4,7 @@ AST-first context infrastructure for AI coding workflows.
 
 - v1 sealed: 11.38x compression, 100% quality accuracy
 - v2 sealed: gate passed (10/10 accuracy, 10.8ms avg latency, 577 avg tokens)
+- v3 kickoff: Layer 3 intent classifier scaffold implemented
 - local-first: source code never leaves your machine
 
 ## Current status
@@ -12,8 +13,8 @@ AST-first context infrastructure for AI coding workflows.
 |---|---|
 | v1 | SEALED (tag: v1.0) |
 | v2 | SEALED (L4 + CLI + hooks + gate) |
-| v3 | UNLOCKED (kickoff ready) |
-| Full active suite | 100 passed, 13 skipped, 0 failed |
+| v3 | ACTIVE (L3 classifier + integration started) |
+| Full active suite | 107 passed, 12 skipped, 0 failed |
 
 ## Why CONTEXTCORE exists
 
