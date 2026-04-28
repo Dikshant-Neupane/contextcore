@@ -1,11 +1,12 @@
 # TEST_MANIFEST.md
 > Living document — updated each time a phase gate is passed.
-> Last updated: Session 12 (2026-04-27)
-> Status: **v1 ✅ SEALED** | **v2 ✅ SEALED** | **v3 🟡 ACTIVE** | **v4 🔒 LOCKED**
+> Last updated: Session 16 (2026-04-28, v4 sealed)
+> Status: **v1 ✅ SEALED** | **v2 ✅ SEALED** | **v3 ✅ SEALED** | **v4 ✅ SEALED**
+> Current verified runs: full suite **124 passed | 1 skipped | 0 failed**; gate suite **14 passed | 0 skipped | 0 failed**.
 
 ---
 
-## TEST COUNT BY PHASE (updated session 12)
+## TEST COUNT BY PHASE (updated session 13)
 
 | Phase       | Registered | Passing | Failing | Skipped | Notes              |
 |-------------|-----------|---------|---------|---------|-------------------|
@@ -14,12 +15,12 @@
 | v2 — CLI    | 6         | 6       | 0       | 0       | COMPLETE session 9 |
 | v2 — Hook   | 4         | 4       | 0       | 0       | COMPLETE session 9 |
 | v2 — Gate   | 3         | 3       | 0       | 0       | SEALED session 10  |
-| integration | —         | 17      | 0       | 13      | v2 unlocked        |
-| **Total**   | **98**    | **111** | **0**   | **10**  | parametrized +13   |
+| integration | —         | 23      | 0       | 1       | v4 unlocked        |
+| **Total**   | **114**   | **122** | **0**   | **1**   | includes v4 integration + runner tests |
 
-Last full run:  111 passed | 10 skipped | 0 failed
+Last full run:  124 passed | 1 skipped | 0 failed
 Command:        python tests/run_all.py
-Date:           2026-04-27 (Session 12 close)
+Date:           2026-04-27 (Session 15 close)
 
 Note on count: 93 > 90 registered because parametrized tests in
 conftest.py expand some fixtures into multiple cases at runtime.
@@ -241,7 +242,7 @@ Both are correct. The number that matters is: 0 failed.
 
 ---
 
-## Layer 3 — Intent Engine (v3 🟡 ACTIVE)
+## Layer 3 — Intent Engine (v3 ✅ SEALED)
 
 | ID    | Test name                                       | File                               | Phase | Status |
 |-------|-------------------------------------------------|------------------------------------|-------|--------|
@@ -256,7 +257,7 @@ Both are correct. The number that matters is: 0 failed.
 
 ---
 
-## Gate v3 (v3 🟡 ACTIVE)
+## Gate v3 (v3 ✅ SEALED)
 
 | ID    | Test name                                | File                   | Phase | Status |
 |-------|------------------------------------------|------------------------|-------|--------|
@@ -266,33 +267,33 @@ Both are correct. The number that matters is: 0 failed.
 
 ---
 
-## Integration — v3 Pipeline (v3 🔒 LOCKED)
+## Integration — v3 Pipeline (v3 ✅ SEALED)
 
 | ID    | Test name                                    | File                            | Phase | Status |
 |-------|----------------------------------------------|---------------------------------|-------|--------|
-| T-085 | test_full_l1_l3_l4_l5_pipeline               | integration/test_v3_pipeline.py | v3    | 🔒 LOCKED |
-| T-086 | test_v3_pipeline_intent_routes_correctly     | integration/test_v3_pipeline.py | v3    | 🔒 LOCKED |
-| T-087 | test_v3_pipeline_latency_under_150ms         | integration/test_v3_pipeline.py | v3    | 🔒 LOCKED |
+| T-085 | test_full_l1_l3_l4_l5_pipeline               | integration/test_v3_pipeline.py | v3    | ✅ PASS |
+| T-086 | test_v3_pipeline_intent_routes_correctly     | integration/test_v3_pipeline.py | v3    | ✅ PASS |
+| T-087 | test_v3_pipeline_latency_under_150ms         | integration/test_v3_pipeline.py | v3    | ✅ PASS |
 
 ---
 
-## Gate v4 (v4 🔒 LOCKED)
+## Gate v4 (v4 ✅ SEALED)
 
 | ID    | Test name                              | File                   | Phase | Status |
 |-------|----------------------------------------|------------------------|-------|--------|
-| G4-01 | test_v4_gate_rbac_permission_correct   | gate_checks/gate_v4.py | v4    | 🔒 LOCKED |
-| G4-02 | test_v4_gate_stale_detection           | gate_checks/gate_v4.py | v4    | 🔒 LOCKED |
-| G4-03 | test_v4_gate_artifacts_exist           | gate_checks/gate_v4.py | v4    | 🔒 LOCKED |
+| G4-01 | test_v4_gate_rbac_permission_correct   | gate_checks/gate_v4.py | v4    | ✅ PASS |
+| G4-02 | test_v4_gate_stale_detection           | gate_checks/gate_v4.py | v4    | ✅ PASS |
+| G4-03 | test_v4_gate_artifacts_exist           | gate_checks/gate_v4.py | v4    | ✅ PASS |
 
 ---
 
-## Integration — v4 Pipeline (v4 🔒 LOCKED)
+## Integration — v4 Pipeline (v4 ✅ SEALED)
 
 | ID    | Test name                          | File                            | Phase | Status |
 |-------|------------------------------------|---------------------------------|-------|--------|
-| T-088 | test_full_stack_pipeline           | integration/test_v4_pipeline.py | v4    | 🔒 LOCKED |
-| T-089 | test_v4_pipeline_rbac_enforced     | integration/test_v4_pipeline.py | v4    | 🔒 LOCKED |
-| T-090 | test_v4_pipeline_stale_nodes_flagged | integration/test_v4_pipeline.py | v4  | 🔒 LOCKED |
+| T-088 | test_full_stack_pipeline           | integration/test_v4_pipeline.py | v4    | ✅ PASS |
+| T-089 | test_v4_pipeline_rbac_enforced     | integration/test_v4_pipeline.py | v4    | ✅ PASS |
+| T-090 | test_v4_pipeline_stale_nodes_flagged | integration/test_v4_pipeline.py | v4  | ✅ PASS |
 
 ---
 
@@ -327,6 +328,16 @@ To seal v2 and unlock v3:
 - [x] Run `python tests/run_all.py --gate` and confirm G2-01 through G2-04 pass
 - [x] Commit with tag `v2`
 
+To seal v4:
+- [x] Implement Layer 2 temporal freshness helpers (`src/contextcore/layer2_temporal/`)
+- [x] Implement RBAC path filtering (`src/contextcore/layer4_graph/rbac.py`)
+- [x] Unlock and pass v4 gate tests (G4-01..G4-03)
+- [x] Unlock and pass v4 integration tests (T-088..T-090)
+- [x] Keep gate suite green (`14 passed | 0 skipped | 0 failed`)
+- [x] Keep full suite green (`124 passed | 1 skipped | 0 failed`)
+- [x] Validate RBAC + freshness behavior on one 200-500 file dogfood project
+- [x] Archive dogfood metrics in CONTEXT.md and update final v4 seal summary
+
 ---
 
 ## SKIP REMOVAL SCHEDULE (final state)
@@ -342,8 +353,8 @@ To seal v2 and unlock v3:
 | tests/hooks/test_git_hook.py            | T-077/080  | [DONE] PASS         | 9       |
 | tests/gate_checks/gate_v2.py            | T-081/083  | [DONE] PASS         | 10      |
 | tests/integration/test_v2_pipeline.py   | —          | [DONE] PASS         | 10      |
-| tests/integration/test_v3_pipeline.py   | —          | [LOCKED] v3         | —       |
-| tests/integration/test_v4_pipeline.py   | —          | [LOCKED] v4         | —       |
+| tests/integration/test_v3_pipeline.py   | —          | [DONE] PASS         | 12      |
+| tests/integration/test_v4_pipeline.py   | —          | [DONE] PASS         | 13      |
 
-All skipif markers removed except gate_v2.py (by design — waits for
-GROUND_TRUTH) and integration pipeline tests (unlock post-gate).
+Remaining intentional skip: optional tiktoken regression test when
+`tiktoken` is unavailable.

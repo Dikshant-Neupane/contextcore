@@ -1,45 +1,40 @@
 ﻿# CONTEXTCORE — context_snapshot.md
 # AI-MAINTAINED — Full replace after every session. Max 80 lines.
-# Last Updated: 2026-04-27 | Session: 11 CLOSED -> 12 READY
+# Last Updated: 2026-04-28 | Session: 16 CLOSED
 # Updated By: AI
 
 ---
 
 ## WHERE WE ARE
-- Version:          v3.0 — ACTIVE
-- Status:           Layer 3 kickoff implemented
-- Test suite:       107 passed | 12 skipped | 0 failed
-- Gate suite:       9 passed | 5 skipped | 0 failed
-- v2 gate:          Still passing (no regression)
+- Version:          v4.0 — SEALED
+- Status:           RBAC + freshness sealed with external dogfood evidence
+- Test suite:       124 passed | 1 skipped | 0 failed
+- Gate suite:       14 passed | 0 skipped | 0 failed
+- External evidence: scrapy (445 Python files) archived
 
 ---
 
-## WHAT WAS COMPLETED IN SESSION 11
-        src/contextcore/layer3_intent/__init__.py
-        src/contextcore/layer3_intent/types.py
-        src/contextcore/layer3_intent/classifier.py
-                                First deterministic intent classifier
-                                TaskType + IntentResult contract
-        tests/layer3_intent/test_classifier.py
-                                T-091 to T-096 all passing
-        src/contextcore/cli/main.py
-                                Added --task-type option to query command
-                                AUTO mode routes via Layer 3 classifier
-        src/contextcore/layer4_graph/querier.py
-                                query() accepts task_type override
-        tests/gate_checks/gate_v3.py
-                                Scaffold prepared with GROUND_TRUTH format
-                                and skip-if guards until labels are filled
+## WHAT WAS COMPLETED IN SESSION 16
+        benchmarks/v4_dogfood_report_external.md
+                                Archived external validation on scrapy
+        benchmarks/v4_dogfood_validate.py
+                                Guarded against zero-file / stale-state false evidence
+        tests/run_all.py
+                                Gate report now reflects sealed phases via SEALED_VERSION
+        tests/conftest.py
+                                Declares CURRENT_VERSION and SEALED_VERSION as v4
+        README.md / PROJECT.md / CONTEXT.md / tests/TEST_MANIFEST.md
+                                Synced to v4 sealed state and current counts
 
 ---
 
-## SESSION 11 FRICTION NOTES
-- Historical docs contain stale phase labels in some sections (non-blocking)
-- Existing CLI still supports --json from v2 tests; markdown remains default
+## SESSION 16 FRICTION NOTES
+- External repo selection must exclude hidden-dir and virtualenv-only candidates
+- The validator now fails fast when indexing finds zero admissible Python files
 
 ---
 
 ## NEXT SESSION FIRST ACTION
-        1) Fill gate_v3 GROUND_TRUTH with 10 labeled prompts
-        2) Run: d:/context/.venv/Scripts/python.exe tests/run_all.py --gate
-        3) Measure intent accuracy against 7/10 v3 target
+        1) Decide whether to commit session-close docs and evidence artifacts
+        2) Create a v4 tag or release workflow if desired
+        3) Start post-v4 roadmap planning from PROJECT.md

@@ -61,3 +61,4 @@ Thumbs.db
 .contextcore/hook.log
 tests/results/latest.md
 tests/results/archive/
+benchmarks/v4_dogfood_report.md
