@@ -1,88 +1,45 @@
-# CONTEXTCORE
+<div align="center">
 
-AST-first context infrastructure for AI coding workflows.
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:0A0A0A,100:222222&height=140&section=header&text=ContextCore&fontColor=F5F5F5&fontSize=56&fontAlignY=50" width="100%" />
 
-```text
-+----------------------------------------------------------------+
-|   ____ ___  _   _ _____ _____ _   _ _____ _____ ___  ____  ___ |
-|  / ___/ _ \| \ | |_   _| ____| \ | |_   _| ____/ _ \|  _ \|_ _||
-| | |  | | | |  \| | | | |  _| |  \| | | | |  _|| | | | |_) || | |
-| | |__| |_| | |\  | | | | |___| |\  | | | | |__| |_| |  _ < | | |
-|  \____\___/|_| \_| |_| |_____|_| \_| |_| |_____\___/|_| \_\___||
-+----------------------------------------------------------------+
-|        Context Delivery Infrastructure for AI Coding           |
-+----------------------------------------------------------------+
-```
+**Engineering the bridge between large codebases and AI context windows.**
 
-CONTEXTCORE converts raw source trees into compact, structurally meaningful context so assistants receive less noise and more relevant signals.
+[![PyPI](https://img.shields.io/pypi/v/contextcore-ai-toolkit?style=flat-square&label=pypi&color=ffffff&labelColor=111111)](https://pypi.org/project/contextcore-ai-toolkit/)
+[![Python](https://img.shields.io/pypi/pyversions/contextcore-ai-toolkit?style=flat-square&color=ffffff&labelColor=111111)](https://pypi.org/project/contextcore-ai-toolkit/)
+[![License](https://img.shields.io/github/license/Dikshant-Neupane/contextcore?style=flat-square&color=ffffff&labelColor=111111)](LICENSE)
 
-## Highlights
+[Install](#installation) • [Features](#features) • [Usage](#usage) • [Architecture](#architecture) • [Quality](#quality-gates)
 
-- v1 sealed: 11.38x compression, 100% eval accuracy
-- v2 sealed: gate passed (10/10 subgraph accuracy, 10.8ms avg latency, 577 avg tokens)
-- v3 sealed: intent routing + v3 gate + v3 integration coverage passing
-- v4 sealed: RBAC + freshness gate, v4 integration, and external dogfood validation passing
-- local-first by design: source code stays on your machine
+</div>
 
-## Current status
+---
 
-| Track | Status |
-|---|---|
-| v1 | SEALED (tag: v1.0) |
-| v2 | SEALED (tag: v2.0) |
-| v3 | SEALED (intent routing + v3 gate + v3 integration) |
-| v4 | SEALED (RBAC + freshness gate + v4 integration + external dogfood evidence) |
-| Active suite | 124 passed, 1 skipped, 0 failed |
-| Gate suite | 14 passed, 0 skipped, 0 failed |
+## The Problem
 
-## Why this exists
+Large repositories do not fit cleanly into LLM context windows. Raw file dumps are noisy, costly, and hard for assistants to reason over.
 
-Raw file dumps are expensive and low-signal for assistants. CONTEXTCORE enforces a layered pipeline to deliver smaller, task-relevant context with measurable quality gates.
+## The Approach
 
-## Layer Status
+**ContextCore** is a local-first, AST-driven context engine that indexes source code into a structured graph and returns ranked, compact context through a deterministic CLI.
 
-- L1 Static Analysis (AST): SEALED
-- L4 Dependency Graph (SQLite): SEALED
-- L5 Compression Emitter (Structured Markdown): SEALED
-- L3 Intent Engine (task routing): SEALED
-- L2 Temporal/Freshness: Implemented staleness/freshness validation and reporting; full temporal decision graph expansion is future work.
+## Features
 
-## Proven results
+- Layered context pipeline with sealed versions (`v1` to `v4`)
+- Role-aware retrieval (`developer`, `auditor`, `maintainer`)
+- Freshness-aware query labeling via staleness checks
+- Structured Markdown output for assistant-friendly consumption
+- Local processing only, no source upload to external APIs
 
-### v4 seal (sealed)
+## Installation
 
-| Metric | Result | Target |
-|---|---|---|
-| RBAC correctness | 0 leaks across developer/auditor/maintainer | 0 unauthorized nodes |
-| Freshness correctness | stale labeling PASS, 0 false positives, reindex clears PASS | PASS |
-| External validation | scrapy dogfood run archived on 445 Python files | 200-500 file real project |
-
-### v1 gate (sealed)
-
-| Metric | Result | Target |
-|---|---|---|
-| Compression ratio | 11.38x | >5x |
-| Accuracy on eval set | 10/10 (100%) | >=80% |
-| Parse failures | 0/20 files | 0 |
-
-### v2 gate (sealed)
-
-| Metric | Result | Target |
-|---|---|---|
-| Subgraph accuracy | 10/10 | >=8/10 |
-| Average latency | 10.8ms | <=500ms |
-| Average tokens | 577 | <=600 |
-
-## Quick start
-
-### Install from PyPI
+### From PyPI (recommended)
 
 ```bash
-pip install contextcore-ai-toolkit==4.0.0
+pip install contextcore-ai-toolkit
 contextcore --help
 ```
 
-### Install from source (contributors)
+### From source (contributors)
 
 ```bash
 pip install -e ".[dev]"
@@ -90,29 +47,76 @@ python tests/run_all.py
 python tests/run_all.py --gate
 ```
 
-## CLI usage
+## Usage
 
 ```bash
+# 1) Index a project
 contextcore index ./sample_project
+
+# 2) Check graph status
 contextcore status
+
+# 3) Query ranked context
 contextcore query "where does token counting happen"
+
+# 4) Show changes since last index
 contextcore diff
 ```
 
-## Documentation map
+### Role and freshness controls
+
+```bash
+contextcore query "auth flow" --role auditor --stale-after-days 30
+```
+
+## Architecture
+
+| Layer | Purpose | Status |
+|---|---|---|
+| L1 | Static analysis (AST extraction) | SEALED |
+| L2 | Temporal/freshness logic | Implemented (decision-graph expansion is future work) |
+| L3 | Intent routing | SEALED |
+| L4 | Dependency/context graph (SQLite) | SEALED |
+| L5 | Structured Markdown emitter | SEALED |
+
+## Quality Gates
+
+| Track | Status |
+|---|---|
+| v1 | SEALED (`v1.0`) |
+| v2 | SEALED (`v2.0`) |
+| v3 | SEALED |
+| v4 | SEALED (RBAC + freshness + external dogfood evidence) |
+| Active suite | 124 passed, 1 skipped, 0 failed |
+| Gate suite | 14 passed, 0 skipped, 0 failed |
+
+### Key sealed metrics
+
+| Metric | Result | Target |
+|---|---|---|
+| v1 compression ratio | 11.38x | >5x |
+| v1 eval accuracy | 10/10 (100%) | >=80% |
+| v2 subgraph accuracy | 10/10 | >=8/10 |
+| v2 avg latency | 10.8ms | <=500ms |
+| v4 external validation | `scrapy` run on 445 Python files | 200-500 file real project |
+
+## Output Contract
+
+`contextcore query` emits structured Markdown with parseable metadata sections, optimized for assistant pipelines and automation.
+
+## Documentation
 
 - [PROJECT.md](PROJECT.md): roadmap and version dashboards
-- [CONTEXT.md](CONTEXT.md): session log and benchmark tracker
+- [CONTEXT.md](CONTEXT.md): execution log and benchmark tracker
 - [DECISIONS.md](DECISIONS.md): architecture decisions (ADRs)
 - [tests/TEST_MANIFEST.md](tests/TEST_MANIFEST.md): test inventory and gate map
 - [.contextcore/context_snapshot.md](.contextcore/context_snapshot.md): current execution snapshot
-- [CLAUDE.md](CLAUDE.md): operational rules used during implementation
 
-## Safety and privacy
+## Security and Privacy
 
-- local processing only
-- no source-code telemetry
-- no external API calls with source code content
+- Local processing only
+- No source-code telemetry
+- No external API calls with source code content
 
 ## License
 
