@@ -5,7 +5,6 @@ Phase: v2 ACTIVE
 
 from __future__ import annotations
 
-import json
 import subprocess
 import sys
 import tempfile
@@ -79,11 +78,35 @@ def test_query_output_is_markdown(indexed_tmpdir: Path):
     assert first_line.startswith("## "), f"Expected Markdown header, got: {first_line!r}"
 
 
-def test_json_flag_returns_json(indexed_tmpdir: Path):
-    """T-076: `contextcore query --json` returns valid JSON."""
+def test_json_flag_keeps_markdown_output(indexed_tmpdir: Path):
+    """T-076: --json is compatibility-only and still returns Markdown."""
     result = _run_cli("query", "User", "--json", cwd=indexed_tmpdir)
     assert result.returncode == 0, f"Exit code {result.returncode}: {result.stderr}"
-    parsed = json.loads(result.stdout.strip())
-    assert "query" in parsed
-    assert "nodes" in parsed
-    assert isinstance(parsed["nodes"], list)
+    assert "[WARN] --json is deprecated" in result.stdout
+    assert "## User" in result.stdout
+    assert "## Meta" in result.stdout
+
+
+def test_query_role_outputs_v4_meta_block(indexed_tmpdir: Path):
+    """v4 role mode includes role/staleness metadata in Markdown."""
+    result = _run_cli(
+        "query",
+        "User",
+        "--role",
+        "maintainer",
+        "--stale-after-days",
+        "30",
+        cwd=indexed_tmpdir,
+    )
+    assert result.returncode == 0, f"Exit code {result.returncode}: {result.stderr}"
+    assert "## Meta" in result.stdout
+    assert "- role: maintainer" in result.stdout
+    assert "- stale_after_days: 30" in result.stdout
+    assert "- elapsed_ms:" in result.stdout
+
+
+def test_query_with_invalid_role_fails(indexed_tmpdir: Path):
+    """Unsupported roles must fail fast with a clear message."""
+    result = _run_cli("query", "User", "--role", "intern", cwd=indexed_tmpdir)
+    assert result.returncode == 1
+    assert "Invalid role" in result.stdout

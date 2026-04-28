@@ -1,0 +1,10 @@
+Summarize how auth/permissions are enforced.
+List files involved in indexing pipeline.
+Show graph schema nodes and edges.
+Where is the DB connection created?
+How does the query ranking work?
+What does the git hook do?
+Where is staleness calculated?
+Show any network or subprocess usage.
+Where are secrets/config loaded?
+Explain how context is emitted.

@@ -24,6 +24,7 @@ app = typer.Typer(add_completion=False, help="CONTEXTCORE — knowledge graph CL
 DB_PATH = ".contextcore/contextcore.db"
 META_PROJECT_PATH = "."
 TASK_TYPE_CHOICES = {"AUTO", "DEBUG", "REFACTOR", "SCAFFOLD", "ONBOARD", "REVIEW", "SECURITY"}
+ROLE_CHOICES = {"developer", "auditor", "maintainer"}
 
 
 def _get_db_path() -> Path:
@@ -54,6 +55,16 @@ def _resolve_task_type(query_text: str, task_type: str) -> str:
         raise ValueError(f"Invalid task type: {task_type}")
     if normalized == "AUTO":
         return classify_query(query_text).task_type.value
+    return normalized
+
+
+def _resolve_role(role: str | None) -> str | None:
+    """Normalize optional role input for v4 query path."""
+    if role is None:
+        return None
+    normalized = role.strip().lower()
+    if normalized not in ROLE_CHOICES:
+        raise ValueError(f"Invalid role: {role}")
     return normalized
 
 
@@ -124,8 +135,10 @@ def index(path: str = typer.Argument(".", help="Project directory to index")) ->
 def query(
     node_name: str = typer.Argument(..., help="Node name or keyword to search for"),
     depth: int = typer.Option(3, help="BFS depth for subgraph expansion"),
-    json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
+    json_output: bool = typer.Option(False, "--json", help="Deprecated: retained for compatibility; output remains Markdown"),
     task_type: str = typer.Option("AUTO", "--task-type", help="AUTO or explicit task mode"),
+    role: str | None = typer.Option(None, "--role", help="Optional v4 role: developer|auditor|maintainer"),
+    stale_after_days: int = typer.Option(30, "--stale-after-days", help="v4 stale threshold in days"),
 ) -> None:
     """Retrieve ranked subgraph for a node."""
     db_path = _get_db_path()
@@ -137,11 +150,20 @@ def query(
     querier = GraphQuerier(db_path=db_path)
     try:
         resolved_task_type = _resolve_task_type(node_name, task_type)
+        resolved_role = _resolve_role(role)
     except ValueError as exc:
         typer.echo(f"[FAIL] {exc}")
         raise typer.Exit(code=1)
 
-    result = querier.query(node_name, task_type=resolved_task_type)
+    if resolved_role:
+        result = querier.query_v4(
+            node_name,
+            role=resolved_role,
+            stale_after_days=stale_after_days,
+            task_type=resolved_task_type,
+        )
+    else:
+        result = querier.query(node_name, task_type=resolved_task_type)
     elapsed_ms = int((time.perf_counter() - t0) * 1000)
 
     if not result.ranked_nodes:
@@ -149,23 +171,22 @@ def query(
         raise typer.Exit(code=0)
 
     if json_output:
-        import json
-        nodes_data = [
-            {"name": node.name, "filepath": node.filepath, "type": node.node_type.value, "score": round(score, 4)}
-            for node, score in result.ranked_nodes
-        ]
-        typer.echo(json.dumps({"query": node_name, "nodes": nodes_data, "total_tokens": result.total_tokens}))
-    else:
-        # Emit markdown for each unique file in the result
-        from contextcore.layer4_graph.schema import NodeType
-        typer.echo(f"## {node_name}\n")
-        for node, score in result.ranked_nodes:
-            type_label = node.node_type.value
-            typer.echo(f"- [{type_label}] {node.name} ({Path(node.filepath).name}) score={score:.3f}")
+        typer.echo("[WARN] --json is deprecated; emitting Structured Markdown output.")
 
-        typer.echo(
-            f"\n[INFO] {result.matched_count} nodes | {result.total_tokens} tokens | {elapsed_ms}ms"
-        )
+    # Emit structured Markdown for each result.
+    typer.echo(f"## {node_name}\n")
+    for node, score in result.ranked_nodes:
+        type_label = node.node_type.value
+        typer.echo(f"- node: {type_label} | {node.name} | {node.filepath} | {score:.3f}")
+
+    typer.echo("\n## Meta")
+    typer.echo(f"- task_type: {resolved_task_type}")
+    if resolved_role:
+        typer.echo(f"- role: {resolved_role}")
+        typer.echo(f"- stale_after_days: {stale_after_days}")
+    typer.echo(f"- matched_count: {result.matched_count}")
+    typer.echo(f"- total_tokens: {result.total_tokens}")
+    typer.echo(f"- elapsed_ms: {elapsed_ms}")
 
 
 @app.command()

@@ -10,6 +10,8 @@ from collections import deque
 from pathlib import Path
 import re
 
+from contextcore.layer2_temporal.freshness import is_file_stale, stale_label
+from contextcore.layer4_graph.rbac import can_access_path
 from contextcore.layer4_graph.schema import GraphEdge, GraphNode, NodeType, SubgraphResult, EdgeType
 
 
@@ -147,6 +149,60 @@ class GraphQuerier:
             total_tokens=token_count,
             query_text=text,
             matched_count=len(trimmed_nodes),
+        )
+
+    def query_v4(
+        self,
+        text: str,
+        role: str,
+        stale_after_days: int = 30,
+        token_budget: int = 600,
+        max_latency_ms: int = 500,
+        task_type: str | None = None,
+    ) -> SubgraphResult:
+        """v4 query path with role-based filtering and stale markers."""
+        base_result = self.query(
+            text=text,
+            token_budget=token_budget,
+            max_latency_ms=max_latency_ms,
+            task_type=task_type,
+        )
+
+        filtered_nodes: list[tuple[GraphNode, float]] = []
+        token_count = 0
+
+        for node, score in base_result.ranked_nodes:
+            if not can_access_path(role, node.filepath):
+                continue
+
+            is_stale = is_file_stale(node.filepath, stale_after_days=stale_after_days)
+            rendered_name = stale_label(node.name, is_stale)
+            rendered_node = (
+                node
+                if rendered_name == node.name
+                else GraphNode(
+                    filepath=node.filepath,
+                    name=rendered_name,
+                    node_type=node.node_type,
+                    docstring=node.docstring,
+                    line_start=node.line_start,
+                    line_end=node.line_end,
+                    confidence=node.confidence,
+                )
+            )
+
+            node_tokens = self._estimate_tokens(rendered_node)
+            if token_count + node_tokens > token_budget:
+                break
+
+            filtered_nodes.append((rendered_node, score))
+            token_count += node_tokens
+
+        return SubgraphResult(
+            ranked_nodes=filtered_nodes,
+            total_tokens=token_count,
+            query_text=text,
+            matched_count=len(filtered_nodes),
         )
 
     def _find_seed_nodes(self, query: str) -> list[tuple[str, GraphNode, float]]:

@@ -1,6 +1,6 @@
 """
 CONTEXTCORE — Gate v3 Kill Tests
-Status: 🟡 PENDING
+Status: [ACTIVE] v3 gate criteria currently passing
 Target: Intent classifier correctly routes 7/10 natural language prompts.
 """
 

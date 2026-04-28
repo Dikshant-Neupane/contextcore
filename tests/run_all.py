@@ -11,8 +11,8 @@ Outputs:
     tests/results/archive/TIMESTAMP.md  <- Permanent record
 
 Exit codes:
-    0 = All active tests passed
-    1 = One or more tests failed
+    0 = Selected test run passed
+    1 = One or more non-gate tests failed
     2 = Kill test failed (phase gate blocked)
 """
 
@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import argparse
 import datetime
-import io
 import re
 import subprocess
 import sys
@@ -36,6 +35,13 @@ from pathlib import Path
 REPO_ROOT   = Path(__file__).resolve().parent.parent
 RESULTS_DIR = REPO_ROOT / "tests" / "results"
 ARCHIVE_DIR = RESULTS_DIR / "archive"
+VERSION_ORDER = ["v1", "v2", "v3", "v4"]
+GATE_REQUIREMENTS = {
+    "v1": ("5x compression, 80% accuracy", "11.38x, 100%"),
+    "v2": ("8/10 subgraph, <=500ms, <=600tok", "sealed"),
+    "v3": ("Intent 7/10 queries", "sealed"),
+    "v4": ("RBAC + freshness", "gate passed"),
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -85,6 +91,45 @@ def extract_summary(output: str) -> dict[str, int]:
     return summary
 
 
+def get_current_version() -> str:
+    """Read the active project phase from tests/conftest.py."""
+    conftest_path = REPO_ROOT / "tests" / "conftest.py"
+    try:
+        content = conftest_path.read_text(encoding="utf-8")
+    except OSError:
+        return "v1"
+
+    match = re.search(r'^CURRENT_VERSION\s*=\s*["\'](v\d+)["\']', content, re.MULTILINE)
+    if not match:
+        return "v1"
+
+    current_version = match.group(1)
+    return current_version if current_version in VERSION_ORDER else "v1"
+
+
+def build_gate_rows(current_version: str) -> list[str]:
+    """Build gate status rows based on the active project phase."""
+    try:
+        current_index = VERSION_ORDER.index(current_version)
+    except ValueError:
+        current_index = 0
+
+    rows = []
+    for index, version in enumerate(VERSION_ORDER):
+        required, notes = GATE_REQUIREMENTS[version]
+        if index < current_index:
+            status = "[PASS] PASSED"
+        elif index == current_index:
+            status = "[ACTIVE] ACTIVE"
+        else:
+            status = "[LOCKED] LOCKED"
+            notes = "-"
+
+        rows.append(f"| {version} Gate | {status} | {required} | {notes} |")
+
+    return rows
+
+
 def write_report(
     output: str,
     summary: dict[str, int],
@@ -92,10 +137,11 @@ def write_report(
     duration_s: float,
     mode: str,
 ) -> Path:
-    timestamp  = datetime.datetime.utcnow()
+    timestamp  = datetime.datetime.now(datetime.UTC)
     ts_str     = timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
     file_ts    = timestamp.strftime("%Y-%m-%d_%H%M%S")
     status_icon = "✅ ALL PASSED" if exit_code == 0 else "❌ FAILURES DETECTED"
+    gate_rows = build_gate_rows(get_current_version())
 
     lines = [
         "# CONTEXTCORE — Test Run Report",
@@ -116,10 +162,7 @@ def write_report(
         "## Gate Status",
         "| Gate | Status | Required | Notes |",
         "|------|--------|----------|-------|",
-        "| v1 Gate | ✅ PASSED | 5x compression, 80% accuracy | 11.38x, 100% |",
-        "| v2 Gate | 🟡 PENDING | 8/10 subgraph, ≤500ms, ≤600tok | — |",
-        "| v3 Gate | 🔒 LOCKED | Intent 7/10 queries | — |",
-        "| v4 Gate | 🔒 LOCKED | RBAC + freshness | — |",
+        *gate_rows,
         "",
         "## Full Output",
         "```",
@@ -141,10 +184,13 @@ def write_report(
     return archive_path
 
 
-def print_gate_verdict(summary: dict[str, int], exit_code: int) -> int:
+def print_gate_verdict(summary: dict[str, int], exit_code: int, mode: str) -> int:
+    """Print a mode-aware verdict and return the corresponding process exit code."""
     print("\n" + "═" * 55)
+    mode_label = "GATE TESTS" if mode == "gate" else ("FULL TEST SUITE" if mode == "full" else "ALL ACTIVE TESTS")
+
     if exit_code == 0:
-        print("[PASS]  ALL ACTIVE TESTS PASSED")
+        print(f"[PASS]  {mode_label} PASSED")
         print(
             f"   {summary['passed']} passed | "
             f"{summary['skipped']} skipped | "
@@ -153,16 +199,21 @@ def print_gate_verdict(summary: dict[str, int], exit_code: int) -> int:
         print("\n   [+] Check tests/results/latest.md for full report")
         print("   [+] Update TEST_MANIFEST.md status column")
         return 0
-    else:
-        print("[FAIL]  TESTS FAILED")
-        print(
-            f"   {summary['passed']} passed | "
-            f"{summary['failed']} failed | "
-            f"{summary['errors']} errors"
-        )
-        print("\n   [!] Do NOT advance to next phase until failures are resolved.")
+
+    print("[FAIL]  TESTS FAILED")
+    print(
+        f"   {summary['passed']} passed | "
+        f"{summary['failed']} failed | "
+        f"{summary['errors']} errors"
+    )
+    if mode == "gate":
+        print("\n   [!] Phase gate is blocked until kill tests pass.")
+        print("   [!] Do NOT advance to next phase until failures are resolved.")
         print("   [+] See tests/results/latest.md for failure details")
-        return 1
+        return 2
+
+    print("\n   [+] See tests/results/latest.md for failure details")
+    return 1
 
 
 def main() -> int:
@@ -184,7 +235,7 @@ def main() -> int:
         archive_path = write_report(output, summary, exit_code, duration, mode)
         print(f"\n[REPORT] Archived: {archive_path.relative_to(REPO_ROOT)}")
 
-    return print_gate_verdict(summary, exit_code)
+    return print_gate_verdict(summary, exit_code, mode)
 
 
 if __name__ == "__main__":
