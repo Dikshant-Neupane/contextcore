@@ -15,6 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
+import sqlite3
 
 import pytest
 
@@ -151,6 +152,30 @@ def _matches_expected(expected: str, returned_values: list[str]) -> bool:
     return any(expected_norm == _normalize_text(value) for value in returned_values)
 
 
+def _ensure_v2_graph_seeded() -> None:
+    """Build a baseline graph so gate queries run on clean CI runners."""
+    root = Path(__file__).resolve().parent.parent.parent
+    db_path = root / ".contextcore" / "contextcore.db"
+
+    # Fast-path when a usable graph DB already exists.
+    if db_path.exists():
+        try:
+            conn = sqlite3.connect(db_path)
+            node_count = conn.execute("SELECT COUNT(1) FROM nodes").fetchone()[0]
+            conn.close()
+            if node_count > 0:
+                return
+        except sqlite3.DatabaseError:
+            pass
+
+    from contextcore.layer4_graph.builder import GraphBuilder
+
+    builder = GraphBuilder(db_path=db_path)
+    builder.index_directory(root / "src")
+    builder.index_directory(root / "sample_project")
+    builder.index_directory(root / "hooks")
+
+
 # ─── Gate test 1: Accuracy 8/10 ─────────────────────────────────────────────
 
 @pytest.mark.skipif(
@@ -170,6 +195,8 @@ def test_v2_gate_subgraph_accuracy_8_of_10() -> None:
     )
 
     from contextcore.layer4_graph.querier import GraphQuerier
+
+    _ensure_v2_graph_seeded()
 
     gq = GraphQuerier()
     passed_count = 0
@@ -205,6 +232,8 @@ def test_v2_gate_avg_latency_under_500ms() -> None:
     import time
     from contextcore.layer4_graph.querier import GraphQuerier
 
+    _ensure_v2_graph_seeded()
+
     gq        = GraphQuerier()
     latencies = []
     for labeled in GROUND_TRUTH[:5]:
@@ -229,6 +258,8 @@ def test_v2_gate_avg_tokens_under_600() -> None:
     """GATE v2 — Kill Test 3: Average token count per subgraph ≤600."""
     pytest.importorskip("contextcore.layer4_graph.querier")
     from contextcore.layer4_graph.querier import GraphQuerier
+
+    _ensure_v2_graph_seeded()
 
     gq     = GraphQuerier()
     counts = []
