@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   validate-release-assets:
+    name: "Dry-run: validate release assets (no publish)"
     if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
@@ -26,7 +27,7 @@ jobs:
           test -f .contextcore/context_snapshot.md
 
   publish-release:
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
 
     steps:
