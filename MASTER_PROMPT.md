@@ -1,49 +1,105 @@
-﻿# CONTEXTCORE — MASTER PROMPT
-# VERSION: Session 17 (post-v4 sealed)
-# FULL REPLACE each session. This file always reflects NEXT session.
+﻿═══════════════════════════════════════════════════════════════
+CONTEXTCORE — MASTER_PROMPT.md (Post-v4 Seal Ops / Maintenance)
+Date: 2026-04-28
+Theme: verify automation + keep repo truthfully synced (no new features)
+═══════════════════════════════════════════════════════════════
 
-You are a senior software engineer continuing CONTEXTCORE after v4 seal.
+YOU ARE PICKING UP CONTEXTCORE AFTER v4 HAS BEEN SEALED.
+Do not ask for re-explanations. Read the files, verify reality, then act.
 
-REPO STATE RIGHT NOW (session 16 closed):
-  v1: SEALED
-  v2: SEALED
-  v3: SEALED
-  v4: SEALED
-  tests: 124 passed | 1 skipped | 0 failed
-  gates: 14 passed | 0 skipped | 0 failed
-  external evidence: scrapy report archived at benchmarks/v4_dogfood_report_external.md
+[YOUR TASK THIS SESSION]
+- Verify the release workflow manual dry-run passes (no publish).
+- Verify CI is green and not misleading (tag-only jobs do not appear on normal pushes).
+- Fix any remaining doc drift so README/snapshot/context match what is actually done.
+- Do NOT add product features.
 
-READ FIRST (in order):
-  1) CLAUDE.md
-  2) CONTEXT.md
-  3) DECISIONS.md
-  4) .contextcore/context_snapshot.md
-  5) tests/TEST_MANIFEST.md
+[CONSTRAINTS THIS SESSION]
+- LOCAL FIRST, NO TELEMETRY.
+- Structured Markdown output contract remains.
+- ASCII-only CLI console output.
+- CLI remains exactly 4 commands (index/query/status/diff).
+- 0 failing tests at all times.
+- Do not commit generated artifacts (.contextcore db, tests/results).
 
-FIRST COMMAND (non-negotiable):
-  d:/context/.venv/Scripts/python.exe tests/run_all.py
-  Expected: 124 passed | 1 skipped | 0 failed
+[DEFINITION OF DONE THIS SESSION]
+- python tests/run_all.py: 0 failures
+- python tests/run_all.py --gate: 0 failures
+- GitHub Actions manual Release dry-run succeeds:
+  - "Dry-run: validate release assets (no publish)" passes
+  - publish-release is skipped on manual run
+- Docs are consistent:
+  - context_snapshot + CONTEXT + PROJECT + README + TEST_MANIFEST agree on sealed status and current counts
+- One clean commit if any drift was fixed; otherwise no code changes.
 
-SESSION 17 THEME:
-  Post-v4 planning, release hygiene, and next-roadmap selection.
+═══════════════════════════════════════════════════════════════
+1) READ FIRST (no actions before reading)
+═══════════════════════════════════════════════════════════════
 
-SESSION 17 OBJECTIVES:
-  A) Keep v4 sealed behavior stable while reviewing any follow-up regressions
-  B) Decide whether to cut a v4 tag / release artifact set
-  C) Choose the next roadmap slice from PROJECT.md without destabilizing sealed phases
-  D) Preserve Markdown-only CLI output, local-first execution, and current test counts
+Read fully, in order:
+1. .contextcore/context_snapshot.md
+2. CONTEXT.md
+3. PROJECT.md
+4. DECISIONS.md
+5. README.md
+6. tests/TEST_MANIFEST.md
+7. pyproject.toml
+8. .github/workflows/ci.yml (or equivalent CI workflow)
+9. .github/workflows/ci-tag-gate.yml (or equivalent)
+10. .github/workflows/release.yml
 
-HARD RULES:
-  - Local-first only, no external source uploads
-  - ASCII-only console output
-  - No new CLI commands unless roadmap docs are explicitly revised
-  - Keep 0 failing tests at all times
-  - Do not weaken sealed gate criteria retroactively
+Then proceed.
 
-DEFINITION OF DONE:
-  [ ] baseline active suite green
-  [ ] chosen post-v4 roadmap slice is documented
-  [ ] any follow-up changes keep full/gate suites green
-  [ ] docs synced at session close
+═══════════════════════════════════════════════════════════════
+2) BASELINE COMMANDS (non-negotiable)
+═══════════════════════════════════════════════════════════════
 
-GO.
+Run:
+  python tests/run_all.py
+  python tests/run_all.py --gate
+
+Must be 0 failed.
+
+If failures exist: stop and fix before doing anything else.
+
+═══════════════════════════════════════════════════════════════
+3) RELEASE WORKFLOW MANUAL DRY-RUN (no tags)
+═══════════════════════════════════════════════════════════════
+
+From GitHub UI:
+- Actions -> Release -> Run workflow (branch: main)
+Expected:
+- Dry-run validation job runs and passes
+- publish-release is skipped (manual runs must never publish)
+
+Do not create v4.0.1 unless you actually want a public patch release.
+
+═══════════════════════════════════════════════════════════════
+4) DOC DRIFT CHECKLIST
+═══════════════════════════════════════════════════════════════
+
+Ensure these statements are true everywhere they appear:
+- v4 is SEALED (and external evidence is archived)
+- Current test totals reflect latest run
+- README does not claim key shipped components are merely "planned" if implemented
+- Any post-tag maintenance is documented (gate_v2 hardening rationale)
+
+If drift exists, fix it and commit a docs-only commit.
+
+═══════════════════════════════════════════════════════════════
+5) SESSION CLOSE (only if changes were made)
+═══════════════════════════════════════════════════════════════
+
+Update required targets per repo rules:
+- .contextcore/context_snapshot.md (FULL REPLACE)
+- CONTEXT.md (APPEND)
+- PROJECT.md (APPEND dashboard)
+- tests/TEST_MANIFEST.md (counts)
+- README.md (if needed)
+- DECISIONS.md (only if a new ADR)
+
+Commit:
+  docs: sync post-v4-seal operational state
+
+═══════════════════════════════════════════════════════════════
+END MASTER PROMPT
+═══════════════════════════════════════════════════════════════

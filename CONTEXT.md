@@ -484,3 +484,37 @@ Pending:
 - Start v4 from locked gate and integration stubs
 
 Commit: pending session-close commit
+
+---
+
+## Session — 2026-04-28 — Post-v4 seal follow-through (CI + Release + Doc Truth)
+
+Theme:
+- Make the sealed state operationally real: CI green, releases automated, docs truthful.
+
+Done:
+- Hardened release workflow:
+   - Tag-driven release publishing remains restricted to version tags.
+   - Added workflow_dispatch dry-run validation (non-publishing).
+   - Added clear UI label for dry-run job.
+- Hardened CI workflow hygiene:
+   - Split tag-only gate workflow from normal push/PR CI to avoid misleading checks.
+   - Upgraded actions versions to current majors (checkout/setup-python).
+- Ensured Markdown-only output contract holds:
+   - CLI emits Structured Markdown; automation parses "## Meta" instead of JSON.
+- Preserved auditability:
+   - Documented post-tag gate_v2 hardening rationale (brittleness hardening; semantics unchanged).
+- Confirmed green health:
+   - Full suite: 124 passed | 1 skipped | 0 failed
+   - Gate suite: 14 passed | 0 skipped | 0 failed
+
+Evidence:
+- External dogfood run completed and archived:
+   - benchmarks/v4_dogfood_report_external.md
+
+Pending:
+- Optional: run GitHub Actions Release workflow manually (workflow_dispatch) to confirm dry-run passes in UI.
+- Optional: cut v4.0.1 only if a real patch release is desired.
+
+Notes:
+- Archival “Pending/Next” items in older snapshots are historical only; current snapshot is authoritative.

@@ -27,13 +27,13 @@ CONTEXTCORE converts raw source trees into compact, structurally meaningful cont
 
 Raw file dumps are expensive and low-signal for assistants. CONTEXTCORE enforces a layered pipeline to deliver smaller, task-relevant context with measurable quality gates.
 
-## Architecture
+## Layer Status
 
-1. L1 static AST extraction (Tree-sitter)
-2. L2 temporal graph (planned)
-3. L3 intent routing (sealed)
-4. L4 dependency graph retrieval (sealed)
-5. L5 compact markdown emission (sealed)
+- L1 Static Analysis (AST): SEALED
+- L4 Dependency Graph (SQLite): SEALED
+- L5 Compression Emitter (Structured Markdown): SEALED
+- L3 Intent Engine (task routing): SEALED
+- L2 Temporal/Freshness: Implemented staleness/freshness validation and reporting; full temporal decision graph expansion is future work.
 
 ## Proven results
 
