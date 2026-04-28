@@ -21,6 +21,7 @@ DB_PATH      = REPO_ROOT / ".contextcore" / "contextcore.db"
 
 # ─── Phase lock ────────────────────────────────────────────────────────────
 CURRENT_VERSION = "v4"      # ← AI: update this when a gate passes
+SEALED_VERSION = "v4"       # ← AI: highest fully sealed version
 
 VERSION_ORDER = ["v1", "v2", "v3", "v4"]
 

@@ -34,6 +34,24 @@ def parse_status(stdout: str) -> dict[str, str]:
     return data
 
 
+def parse_index_output(stdout: str) -> dict[str, int]:
+    data = {"indexed_files": -1, "nodes": -1, "edges": -1, "elapsed_ms": -1}
+    line = stdout.strip()
+    if not line.startswith("[INFO] Indexed "):
+        return data
+
+    try:
+        parts = [part.strip() for part in line[len("[INFO] "):].split("|")]
+        data["indexed_files"] = int(parts[0].removeprefix("Indexed ").removesuffix(" files").strip())
+        data["nodes"] = int(parts[1].removeprefix("nodes").strip()) if parts[1].startswith("nodes") else int(parts[1].removesuffix(" nodes").strip())
+        data["edges"] = int(parts[2].removeprefix("edges").strip()) if parts[2].startswith("edges") else int(parts[2].removesuffix(" edges").strip())
+        data["elapsed_ms"] = int(parts[3].removesuffix("ms").strip())
+    except (IndexError, ValueError):
+        return {"indexed_files": -1, "nodes": -1, "edges": -1, "elapsed_ms": -1}
+
+    return data
+
+
 def load_queries(path: Path) -> list[str]:
     return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
@@ -366,12 +384,29 @@ def main() -> int:
         return 1
 
     file_count = len([p for p in project_path.rglob("*.py") if not any(part.startswith(".") or part == "__pycache__" for part in p.parts)])
+    if file_count == 0:
+        print(f"[FAIL] No indexable Python files found in target: {project_path}")
+        return 1
 
     t0 = time.perf_counter()
     index_result = run_cli(repo_root, ["index", str(project_path)])
     index_ms = int((time.perf_counter() - t0) * 1000)
     if index_result.returncode != 0:
         print(index_result.stdout + index_result.stderr)
+        return 1
+
+    index_meta = parse_index_output(index_result.stdout)
+    indexed_files = index_meta.get("indexed_files", -1)
+    if indexed_files < 0:
+        print(f"[FAIL] Could not parse index output: {index_result.stdout.strip()}")
+        return 1
+    if indexed_files == 0:
+        print(f"[FAIL] Index command processed 0 files for target: {project_path}")
+        return 1
+    if indexed_files != file_count:
+        print(
+            f"[FAIL] Index file count mismatch for target {project_path}: expected {file_count}, indexed {indexed_files}"
+        )
         return 1
 
     status_result = run_cli(repo_root, ["status"])

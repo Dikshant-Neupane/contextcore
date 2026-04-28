@@ -107,6 +107,22 @@ def get_current_version() -> str:
     return current_version if current_version in VERSION_ORDER else "v1"
 
 
+def get_sealed_version() -> str:
+    """Read the highest sealed project phase from tests/conftest.py."""
+    conftest_path = REPO_ROOT / "tests" / "conftest.py"
+    try:
+        content = conftest_path.read_text(encoding="utf-8")
+    except OSError:
+        return "v1"
+
+    match = re.search(r'^SEALED_VERSION\s*=\s*["\'](v\d+)["\']', content, re.MULTILINE)
+    if not match:
+        return "v1"
+
+    sealed_version = match.group(1)
+    return sealed_version if sealed_version in VERSION_ORDER else "v1"
+
+
 def build_gate_rows(current_version: str) -> list[str]:
     """Build gate status rows based on the active project phase."""
     try:
@@ -114,10 +130,15 @@ def build_gate_rows(current_version: str) -> list[str]:
     except ValueError:
         current_index = 0
 
+    try:
+        sealed_index = VERSION_ORDER.index(get_sealed_version())
+    except ValueError:
+        sealed_index = 0
+
     rows = []
     for index, version in enumerate(VERSION_ORDER):
         required, notes = GATE_REQUIREMENTS[version]
-        if index < current_index:
+        if index <= sealed_index:
             status = "[PASS] PASSED"
         elif index == current_index:
             status = "[ACTIVE] ACTIVE"
