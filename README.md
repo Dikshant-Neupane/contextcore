@@ -2,6 +2,14 @@
 
 AST-first context infrastructure for AI coding workflows.
 
+```text
+	____ ___  _   _ _____ _____ _   _ _____ _____ ___  ____  _____
+ / ___/ _ \| \ | |_   _| ____| \ | |_   _| ____/ _ \|  _ \| ____|
+| |  | | | |  \| | | | |  _| |  \| | | | |  _|| | | | |_) |  _|
+| |__| |_| | |\  | | | | |___| |\  | | | | |__| |_| |  _ <| |___
+ \____\___/|_| \_| |_| |_____|_| \_| |_| |_____\___/|_| \_\_____|
+```
+
 CONTEXTCORE converts raw source trees into compact, structurally meaningful context so assistants receive less noise and more relevant signals.
 
 ## Highlights
@@ -62,6 +70,15 @@ Raw file dumps are expensive and low-signal for assistants. CONTEXTCORE enforces
 | Average tokens | 577 | <=600 |
 
 ## Quick start
+
+### Install from PyPI
+
+```bash
+pip install contextcore-ai-toolkit==4.0.0
+contextcore --help
+```
+
+### Install from source (contributors)
 
 ```bash
 pip install -e ".[dev]"

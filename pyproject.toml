@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "contextcore"
+name = "contextcore-ai-toolkit"
 version = "4.0.0"
 description = "5-layer hybrid context delivery system for AI coding assistants."
 readme = "README.md"
